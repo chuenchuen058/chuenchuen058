@@ -16,6 +16,10 @@ Sobriety-controlled dispenser — a hackathon build on an Arduino UNO R3: state 
 
 CAD & competition work — Fusion 360 design for the Olympus Rover Trials.
 
+### Also contributing to
+
+BlueBand — Thomas van Pul's wearable motion band project — on the PCB/hardware side.
+
 ### Stack
 
 ![Python](https://img.shields.io/badge/-Python-3776AB?style=flat-square&logo=python&logoColor=white)
