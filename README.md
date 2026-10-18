@@ -5,7 +5,7 @@
 
 <p align="center">
   <a href="https://git.io/typing-svg">
-    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=800&color=00C6FF&center=true&vCenter=true&width=620&lines=I+build+things+that+move+%F0%9F%A4%96;ESP32+%C2%B7+Arduino+%C2%B7+Python+%C2%B7+C%2FC%23;Biomedical+Engineering+%40+King's+College+London;Open+to+robotics+%26+automation+internships" alt="Typing intro"/>
+    <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=3000&pause=800&color=00C6FF&center=true&vCenter=true&width=620&lines=ESP32+%C2%B7+Arduino+%C2%B7+Python+%C2%B7+C%2FC%23;Biomedical+Engineering+%40+King's+College+London;Open+to+robotics+%26+automation+internships" alt="Typing intro"/>
   </a>
 </p>
 
@@ -19,8 +19,6 @@
 ---
 
 ## 👋 About me
-
-I build things that move — and the software and electronics that make them work.
 
 - 🎓 **2nd-year Biomedical Engineering** student at **King's College London**
 - 🏭 Former **Manufacturing & Design Engineering intern** at **Plexus**, Penang
@@ -98,10 +96,6 @@ I build things that move — and the software and electronics that make them wor
 <p align="center">
   <img height="165" src="https://github-readme-stats.vercel.app/api?username=chuenchuen058&show_icons=true&theme=tokyonight&hide_border=true&include_all_commits=true&count_private=true" alt="GitHub stats"/>
   <img height="165" src="https://streak-stats.demolab.com?user=chuenchuen058&theme=tokyonight&hide_border=true" alt="GitHub streak"/>
-</p>
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/output/github-snake-dark.svg" alt="Contribution snake"/>
 </p>
 
 ---
