@@ -46,10 +46,11 @@
       <h3>🧠 Denisse</h3>
       <p>
         <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white"/>
-        <img src="https://img.shields.io/badge/Claude_API-D97757?style=flat-square&logo=anthropic&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Ollama-000000?style=flat-square&logo=ollama&logoColor=white"/>
+        <img src="https://img.shields.io/badge/Llama_3.1_8B-0467DF?style=flat-square&logo=meta&logoColor=white"/>
         <img src="https://img.shields.io/badge/status-private_WIP-lightgrey?style=flat-square"/>
       </p>
-      A personal, Jarvis-style AI assistant: a local Python daemon wrapping the Claude API with tool use, so it can <i>act</i> on my machine (run commands, open apps, read and write files) instead of just answering questions. v1 covers text chat, system control and memory that persists across restarts.
+      A personal, Jarvis-style AI assistant that runs 100% locally: Llama 3.1 8B served through Ollama, with a tool-use loop so it can <i>act</i> on my machine (run commands, open apps, manage files, tasks and Spotify) instead of just answering questions. It has push-to-talk and "hey Denisse" wake-word voice modes, a tray app, persistent memory, and an eval suite I use to measure every prompt change.
     </td>
   </tr>
   <tr>
@@ -86,7 +87,7 @@
   <img src="https://img.shields.io/badge/ESP32-E7352C?style=for-the-badge&logo=espressif&logoColor=white"/>
   <img src="https://img.shields.io/badge/Fusion_360-F7931E?style=for-the-badge&logo=autodesk&logoColor=white"/>
   <img src="https://img.shields.io/badge/PCB_Design-2E7D32?style=for-the-badge&logo=circuitverse&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Claude_API-D97757?style=for-the-badge&logo=anthropic&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Ollama-000000?style=for-the-badge&logo=ollama&logoColor=white"/>
 </p>
 
 ---
