@@ -11,19 +11,21 @@ import urllib.request
 
 CELL, GAP = 10, 3
 STEP = CELL + GAP
-MARGIN = 16
-SECONDS_PER_CELL = 0.09
+LEFT, TOP, PAD = 32, 22, 4  # room for weekday labels on the left, months on top
+SECONDS_PER_CELL = 0.135
 END_PAUSE = 2.0
 
 THEMES = {
-    "": ["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"],
-    "-dark": ["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"],
+    "": (["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"], "#57606a"),
+    "-dark": (["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"], "#8b949e"),
 }
+MONTHS = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
+WEEKDAYS = {1: "Mon", 3: "Wed", 5: "Fri"}
 LEVELS = {"NONE": 0, "FIRST_QUARTILE": 1, "SECOND_QUARTILE": 2,
           "THIRD_QUARTILE": 3, "FOURTH_QUARTILE": 4}
 
 QUERY = """query($login: String!) { user(login: $login) { contributionsCollection {
-  contributionCalendar { weeks { contributionDays { weekday contributionLevel } } } } } }"""
+  contributionCalendar { weeks { contributionDays { date weekday contributionLevel } } } } } }"""
 
 
 def fetch(user, token):
@@ -37,8 +39,11 @@ def fetch(user, token):
     if "errors" in data:
         sys.exit(f"GraphQL error: {data['errors']}")
     weeks = data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]
-    return {(x, d["weekday"]): LEVELS[d["contributionLevel"]]
-            for x, w in enumerate(weeks) for d in w["contributionDays"]}
+    cells = {(x, d["weekday"]): LEVELS[d["contributionLevel"]]
+             for x, w in enumerate(weeks) for d in w["contributionDays"]}
+    # The month each week column starts in, from that week's first date
+    week_months = [int(w["contributionDays"][0]["date"][5:7]) for w in weeks]
+    return cells, week_months
 
 
 def plan_route(cells):
@@ -46,12 +51,12 @@ def plan_route(cells):
 
     Each step walks (breadth-first, one cell per step) to the nearest uneaten
     square of the current level, going around darker squares that aren't due
-    yet. Pac-Man may walk one cell outside the grid, as the snake does.
+    yet. Pac-Man stays on the grid's own squares.
     """
-    weeks = max(x for x, _ in cells) + 1
     left = {c: lvl for c, lvl in cells.items() if lvl > 0}
-    pos = (-1, -1)
+    pos = min(cells)
     route = [pos]
+    left.pop(pos, None)
 
     def walk(targets, max_lvl):
         prev, frontier = {pos: None}, [pos]
@@ -66,8 +71,7 @@ def plan_route(cells):
                     return path[::-1]
                 for d in ((1, 0), (-1, 0), (0, 1), (0, -1)):
                     n = (c[0] + d[0], c[1] + d[1])
-                    if (-1 <= n[0] <= weeks and -1 <= n[1] <= 7 and n not in prev
-                            and left.get(n, 0) <= max_lvl):
+                    if n in cells and n not in prev and left.get(n, 0) <= max_lvl:
                         prev[n] = c
                         nxt.append(n)
             frontier = nxt
@@ -84,18 +88,31 @@ def plan_route(cells):
 
 
 def centre(c):
-    return MARGIN + c[0] * STEP + CELL / 2, MARGIN + c[1] * STEP + CELL / 2
+    return LEFT + c[0] * STEP + CELL / 2, TOP + c[1] * STEP + CELL / 2
 
 
-def mouth(deg, r=6.5):
+def labels(week_months, colour):
+    style = f'font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="10" fill="{colour}"'
+    out = []
+    starts = [x for x, m in enumerate(week_months) if x == 0 or m != week_months[x - 1]]
+    for i, x in enumerate(starts):
+        if i + 1 < len(starts) and starts[i + 1] - x < 3:
+            continue  # too narrow to fit a label, as on GitHub
+        out.append(f'<text x="{LEFT + x * STEP}" y="{TOP - 8}" {style}>{MONTHS[week_months[x] - 1]}</text>')
+    for y, name in WEEKDAYS.items():
+        out.append(f'<text x="0" y="{TOP + y * STEP + CELL - 1}" {style}>{name}</text>')
+    return out
+
+
+def mouth(deg, r=5.5):
     a = math.radians(deg)
     x, y = r * math.cos(a), r * math.sin(a)
     return f"M0,0 L{x:.2f},{-y:.2f} A{r},{r} 0 1 0 {x:.2f},{y:.2f} Z"
 
 
-def render(cells, route, palette):
-    weeks = max(x for x, _ in cells) + 1
-    width, height = 2 * MARGIN + weeks * STEP - GAP, 2 * MARGIN + 7 * STEP - GAP
+def render(cells, week_months, route, palette, text):
+    weeks = len(week_months)
+    width, height = LEFT + weeks * STEP - GAP + PAD, TOP + 7 * STEP - GAP + PAD
     moving = (len(route) - 1) * SECONDS_PER_CELL
     total = moving + END_PAUSE
     eaten_at = {}
@@ -104,8 +121,9 @@ def render(cells, route, palette):
 
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
            f'viewBox="0 0 {width} {height}">']
+    out += labels(week_months, text)
     for (x, y), lvl in sorted(cells.items()):
-        px, py = MARGIN + x * STEP, MARGIN + y * STEP
+        px, py = LEFT + x * STEP, TOP + y * STEP
         rect = f'<rect x="{px}" y="{py}" width="{CELL}" height="{CELL}" rx="2" fill="{palette[lvl]}"'
         if lvl and (x, y) in eaten_at:
             out.append(f'{rect}><animate attributeName="fill" calcMode="discrete" '
@@ -131,12 +149,12 @@ def render(cells, route, palette):
 
 def main():
     user, out_dir = sys.argv[1], sys.argv[2]
-    cells = fetch(user, os.environ["GITHUB_TOKEN"])
+    cells, week_months = fetch(user, os.environ["GITHUB_TOKEN"])
     route = plan_route(cells)
     os.makedirs(out_dir, exist_ok=True)
-    for suffix, palette in THEMES.items():
+    for suffix, (palette, text) in THEMES.items():
         with open(os.path.join(out_dir, f"pacman-contribution-graph{suffix}.svg"), "w") as f:
-            f.write(render(cells, route, palette))
+            f.write(render(cells, week_months, route, palette, text))
     print(f"{sum(1 for v in cells.values() if v)} cells to eat, {len(route) - 1} steps")
 
 
