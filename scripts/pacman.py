@@ -11,7 +11,7 @@ import urllib.request
 
 CELL, GAP = 10, 3
 STEP = CELL + GAP
-MARGIN = 12
+MARGIN = 16
 SECONDS_PER_CELL = 0.09
 END_PAUSE = 2.0
 
@@ -42,19 +42,44 @@ def fetch(user, token):
 
 
 def plan_route(cells):
-    """Greedy nearest-neighbour walk over the grid, one cell per step."""
-    pos = (0, 0)
+    """Eat the lightest squares first and the darkest last, like Platane/snk.
+
+    Each step walks (breadth-first, one cell per step) to the nearest uneaten
+    square of the current level, going around darker squares that aren't due
+    yet. Pac-Man may walk one cell outside the grid, as the snake does.
+    """
+    weeks = max(x for x, _ in cells) + 1
+    left = {c: lvl for c, lvl in cells.items() if lvl > 0}
+    pos = (-1, -1)
     route = [pos]
-    todo = {c for c, lvl in cells.items() if lvl > 0} - {pos}
-    while todo:
-        target = min(todo, key=lambda c: (abs(c[0] - pos[0]) + abs(c[1] - pos[1]), c))
-        while pos != target:
-            if pos[1] != target[1]:
-                pos = (pos[0], pos[1] + (1 if target[1] > pos[1] else -1))
-            else:
-                pos = (pos[0] + (1 if target[0] > pos[0] else -1), pos[1])
-            route.append(pos)
-            todo.discard(pos)
+
+    def walk(targets, max_lvl):
+        prev, frontier = {pos: None}, [pos]
+        while frontier:
+            nxt = []
+            for c in frontier:
+                if c in targets:
+                    path = []
+                    while c != pos:
+                        path.append(c)
+                        c = prev[c]
+                    return path[::-1]
+                for d in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                    n = (c[0] + d[0], c[1] + d[1])
+                    if (-1 <= n[0] <= weeks and -1 <= n[1] <= 7 and n not in prev
+                            and left.get(n, 0) <= max_lvl):
+                        prev[n] = c
+                        nxt.append(n)
+            frontier = nxt
+        return None
+
+    for lvl in range(1, 5):
+        while targets := {c for c, v in left.items() if v == lvl}:
+            path = walk(targets, lvl) or walk(targets, 4)
+            for c in path:
+                left.pop(c, None)
+            route += path
+            pos = route[-1]
     return route
 
 

@@ -106,14 +106,6 @@
   </picture>
 </p>
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/output/breakout-contribution-graph-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/output/breakout-contribution-graph.svg">
-    <img alt="Breakout smashing my contribution graph" src="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/output/breakout-contribution-graph.svg">
-  </picture>
-</p>
-
 ---
 
 <p align="center">
