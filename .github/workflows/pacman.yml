@@ -1,4 +1,4 @@
-name: Generate Pac-Man contribution graph
+name: Generate arcade contribution graphs
 
 on:
   schedule:
@@ -18,7 +18,7 @@ jobs:
       - uses: abozanona/pacman-contribution-graph@v5.0.0
         with:
           github_user_name: ${{ github.repository_owner }}
-          games: pacman
+          games: pacman,breakout
 
       - uses: crazy-max/ghaction-github-pages@v4
         with:
