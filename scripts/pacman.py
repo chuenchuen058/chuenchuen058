@@ -11,13 +11,18 @@ import urllib.request
 
 CELL, GAP = 10, 3
 STEP = CELL + GAP
-LEFT, TOP, PAD = 32, 22, 4  # room for weekday labels on the left, months on top
+# Drawn like GitHub's contribution box: a heading above, a bordered box holding
+# the month/weekday labels and the grid, and the Less/More key under the grid.
+HEADER, BOX_PAD = 28, 14
+LEFT = BOX_PAD + 32          # room for weekday labels
+TOP = HEADER + BOX_PAD + 20  # room for month labels
+LEGEND = 26                  # the Less/More row under the grid
 SECONDS_PER_CELL = 0.135
 END_PAUSE = 2.0
 
 THEMES = {
-    "": (["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"], "#57606a"),
-    "-dark": (["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"], "#8b949e"),
+    "": (["#ebedf0", "#9be9a8", "#40c463", "#30a14e", "#216e39"], "#57606a", "#1f2328", "#d0d7de"),
+    "-dark": (["#161b22", "#0e4429", "#006d32", "#26a641", "#39d353"], "#8b949e", "#e6edf3", "#30363d"),
 }
 MONTHS = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
 WEEKDAYS = {1: "Mon", 3: "Wed", 5: "Fri"}
@@ -25,7 +30,7 @@ LEVELS = {"NONE": 0, "FIRST_QUARTILE": 1, "SECOND_QUARTILE": 2,
           "THIRD_QUARTILE": 3, "FOURTH_QUARTILE": 4}
 
 QUERY = """query($login: String!) { user(login: $login) { contributionsCollection {
-  contributionCalendar { weeks { contributionDays { date weekday contributionLevel } } } } } }"""
+  contributionCalendar { totalContributions weeks { contributionDays { date weekday contributionLevel } } } } } }"""
 
 
 def fetch(user, token):
@@ -38,12 +43,13 @@ def fetch(user, token):
         data = json.load(r)
     if "errors" in data:
         sys.exit(f"GraphQL error: {data['errors']}")
-    weeks = data["data"]["user"]["contributionsCollection"]["contributionCalendar"]["weeks"]
+    calendar = data["data"]["user"]["contributionsCollection"]["contributionCalendar"]
+    weeks = calendar["weeks"]
     cells = {(x, d["weekday"]): LEVELS[d["contributionLevel"]]
              for x, w in enumerate(weeks) for d in w["contributionDays"]}
     # The month each week column starts in, from that week's first date
     week_months = [int(w["contributionDays"][0]["date"][5:7]) for w in weeks]
-    return cells, week_months
+    return cells, week_months, calendar["totalContributions"]
 
 
 def plan_route(cells):
@@ -91,8 +97,11 @@ def centre(c):
     return LEFT + c[0] * STEP + CELL / 2, TOP + c[1] * STEP + CELL / 2
 
 
+FONT = 'font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif"'
+
+
 def labels(week_months, colour):
-    style = f'font-family="-apple-system,Segoe UI,Helvetica,Arial,sans-serif" font-size="10" fill="{colour}"'
+    style = f'{FONT} font-size="10" fill="{colour}"'
     out = []
     starts = [x for x, m in enumerate(week_months) if x == 0 or m != week_months[x - 1]]
     for i, x in enumerate(starts):
@@ -100,7 +109,7 @@ def labels(week_months, colour):
             continue  # too narrow to fit a label, as on GitHub
         out.append(f'<text x="{LEFT + x * STEP}" y="{TOP - 8}" {style}>{MONTHS[week_months[x] - 1]}</text>')
     for y, name in WEEKDAYS.items():
-        out.append(f'<text x="0" y="{TOP + y * STEP + CELL - 1}" {style}>{name}</text>')
+        out.append(f'<text x="{BOX_PAD}" y="{TOP + y * STEP + CELL - 1}" {style}>{name}</text>')
     return out
 
 
@@ -110,9 +119,28 @@ def mouth(deg, r=5.5):
     return f"M0,0 L{x:.2f},{-y:.2f} A{r},{r} 0 1 0 {x:.2f},{y:.2f} Z"
 
 
-def render(cells, week_months, route, palette, text):
+def frame(total, grid_right, grid_bottom, palette, text, heading, border):
+    """Heading, border and Less/More key around the grid."""
+    box_w, box_h = grid_right + BOX_PAD, grid_bottom + LEGEND + BOX_PAD - HEADER
+    noun = "contribution" if total == 1 else "contributions"
+    out = [f'<text x="0.5" y="16" {FONT} font-size="14" fill="{heading}">'
+           f'{total:,} {noun} in the last year</text>',
+           f'<rect x="0.5" y="{HEADER + 0.5}" width="{box_w - 0.5}" height="{box_h - 1}" rx="6" '
+           f'fill="none" stroke="{border}"/>']
+    style = f'{FONT} font-size="10" fill="{text}"'
+    y = grid_bottom + 14
+    x = grid_right - 30 - 5 * STEP + GAP  # leave room for "More" to end at the grid's edge
+    out.append(f'<text x="{x - 6}" y="{y + CELL - 1}" text-anchor="end" {style}>Less</text>')
+    for i, colour in enumerate(palette):
+        out.append(f'<rect x="{x + i * STEP}" y="{y}" width="{CELL}" height="{CELL}" rx="2" fill="{colour}"/>')
+    out.append(f'<text x="{x + 5 * STEP + 3}" y="{y + CELL - 1}" {style}>More</text>')
+    return out, box_w + 1, HEADER + box_h + 1
+
+
+def render(cells, week_months, total_contribs, route, palette, text, heading, border):
     weeks = len(week_months)
-    width, height = LEFT + weeks * STEP - GAP + PAD, TOP + 7 * STEP - GAP + PAD
+    grid_right, grid_bottom = LEFT + weeks * STEP - GAP, TOP + 7 * STEP - GAP
+    framing, width, height = frame(total_contribs, grid_right, grid_bottom, palette, text, heading, border)
     moving = (len(route) - 1) * SECONDS_PER_CELL
     total = moving + END_PAUSE
     eaten_at = {}
@@ -121,6 +149,7 @@ def render(cells, week_months, route, palette, text):
 
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
            f'viewBox="0 0 {width} {height}">']
+    out += framing
     out += labels(week_months, text)
     for (x, y), lvl in sorted(cells.items()):
         px, py = LEFT + x * STEP, TOP + y * STEP
@@ -149,12 +178,12 @@ def render(cells, week_months, route, palette, text):
 
 def main():
     user, out_dir = sys.argv[1], sys.argv[2]
-    cells, week_months = fetch(user, os.environ["GITHUB_TOKEN"])
+    cells, week_months, total_contribs = fetch(user, os.environ["GITHUB_TOKEN"])
     route = plan_route(cells)
     os.makedirs(out_dir, exist_ok=True)
-    for suffix, (palette, text) in THEMES.items():
+    for suffix, (palette, text, heading, border) in THEMES.items():
         with open(os.path.join(out_dir, f"pacman-contribution-graph{suffix}.svg"), "w") as f:
-            f.write(render(cells, week_months, route, palette, text))
+            f.write(render(cells, week_months, total_contribs, route, palette, text, heading, border))
     print(f"{sum(1 for v in cells.values() if v)} cells to eat, {len(route) - 1} steps")
 
 
