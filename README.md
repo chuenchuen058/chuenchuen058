@@ -98,6 +98,14 @@
   <img height="165" src="https://streak-stats.demolab.com?user=chuenchuen058&theme=tokyonight&hide_border=true" alt="GitHub streak"/>
 </p>
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/output/pacman-contribution-graph-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/output/pacman-contribution-graph.svg">
+    <img alt="Pac-Man eating my contribution graph" src="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/output/pacman-contribution-graph.svg">
+  </picture>
+</p>
+
 ---
 
 <p align="center">
