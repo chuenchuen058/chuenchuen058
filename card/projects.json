@@ -1,0 +1,67 @@
+{
+  "projects": [
+    {
+      "id": "denisse",
+      "name": "Denisse",
+      "colour": "#8957e5",
+      "motif": "wave",
+      "lines": [
+        "Local voice assistant on Llama 3.1 8B.",
+        "Tool routing, nightly eval, offline wake word."
+      ],
+      "tags": [
+        "Python",
+        "Ollama",
+        "Vosk"
+      ],
+      "status": "Active"
+    },
+    {
+      "id": "robotic-tail",
+      "name": "Robotic Tail",
+      "colour": "#d29922",
+      "motif": "tail",
+      "lines": [
+        "Wearable tail for balance assistance,",
+        "built from square seahorse vertebrae."
+      ],
+      "tags": [
+        "Fusion 360",
+        "Python",
+        "FDM"
+      ],
+      "status": "Redesign"
+    },
+    {
+      "id": "unibots",
+      "name": "UnibotsMarkII",
+      "colour": "#f85149",
+      "motif": "robot",
+      "lines": [
+        "4-wheel ESP32 competition robot:",
+        "TB6612FNG drivers, MPU6050 IMU."
+      ],
+      "tags": [
+        "ESP32",
+        "C++",
+        "Embedded"
+      ],
+      "status": "Bring-up"
+    },
+    {
+      "id": "blueband",
+      "name": "BlueBand",
+      "colour": "#388bfd",
+      "motif": "band",
+      "lines": [
+        "Wearable motion band: PCB and",
+        "hardware, with Thomas van Pul."
+      ],
+      "tags": [
+        "PCB",
+        "Hardware"
+      ],
+      "status": "Collaboration"
+    }
+  ]
+}
