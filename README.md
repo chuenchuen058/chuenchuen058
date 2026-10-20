@@ -13,16 +13,27 @@ Biomedical Engineering · King's College London
 
 </div>
 
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/highlights-dark.svg">
-  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/highlights-light.svg">
-  <img alt="Highlights: live GitHub stats, languages, and a timeline of internships, awards, projects and leadership" src="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/highlights-dark.svg" width="100%">
-</picture>
-
 ### Projects
 
-- **[Denisse](https://github.com/chuenchuen058/denisse)** - local voice assistant on Llama 3.1 8B (Ollama). Per-turn tool routing, a nightly 24-case eval, offline wake word.
-- **UnibotsMarkII** - 4-wheel ESP32 competition robot: TB6612FNG drivers, MPU6050 IMU, encoder odometry. In hardware bring-up.
-- **BlueBand** - PCB and hardware for a wearable motion band, with [Thomas van Pul](https://github.com/thomasvanpul).
-
-Looking for robotics and automation internships in Penang.
+<p>
+<a href="https://github.com/chuenchuen058/denisse"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/denisse-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/denisse-light.svg">
+  <img alt="Denisse: local voice assistant on Llama 3.1 8B" src="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/denisse-dark.svg" width="49%">
+</picture></a>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/robotic-tail-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/robotic-tail-light.svg">
+  <img alt="Robotic Tail: wearable tail for balance assistance" src="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/robotic-tail-dark.svg" width="49%">
+</picture>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/unibots-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/unibots-light.svg">
+  <img alt="UnibotsMarkII: 4-wheel ESP32 competition robot" src="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/unibots-dark.svg" width="49%">
+</picture>
+<a href="https://github.com/thomasvanpul/blueband-concept"><picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/blueband-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/blueband-light.svg">
+  <img alt="BlueBand: wearable motion band, with Thomas van Pul" src="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/blueband-dark.svg" width="49%">
+</picture></a>
+</p>
