@@ -1,8 +1,16 @@
+<div align="center">
+
 ## Xi Chuen Lim
 
-Biomedical Engineering student at King's College London, working on robotics and embedded systems (ESP32, C/C++, Python, Fusion 360).
+Biomedical Engineering · King's College London<br>
+Robotics and embedded systems
 
-Looking for robotics and automation internships in Penang.
+<a href="https://linkedin.com/in/xichuenlim"><img src="https://img.shields.io/badge/LinkedIn-0A66C2?style=flat-square&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
+<a href="mailto:xichuen.lim@kcl.ac.uk"><img src="https://img.shields.io/badge/Email-D14836?style=flat-square&logo=gmail&logoColor=white" alt="Email"></a>
+
+<img src="https://skillicons.dev/icons?i=py,c,cpp,cs,arduino,matlab,git" height="36" alt="Python, C, C++, C#, Arduino, MATLAB, Git">
+
+</div>
 
 ### Projects
 
@@ -10,4 +18,4 @@ Looking for robotics and automation internships in Penang.
 - **UnibotsMarkII** - 4-wheel ESP32 competition robot: TB6612FNG drivers, MPU6050 IMU, encoder odometry. In hardware bring-up.
 - **BlueBand** - PCB and hardware for a wearable motion band, with [Thomas van Pul](https://github.com/thomasvanpul).
 
-[LinkedIn](https://linkedin.com/in/xichuenlim) · xichuen.lim@kcl.ac.uk
+Looking for robotics and automation internships in Penang.
