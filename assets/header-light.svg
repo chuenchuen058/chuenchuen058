@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="250" viewBox="0 0 1200 250">
+<rect x="1" y="1" width="1198" height="248" rx="12" fill="#ffffff" stroke="#d0d7de"/>
+<path id="t0" d="M880,84 L820,84 L790,54 L690,54" fill="none" stroke="#0969da" stroke-opacity="0.45" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="690" cy="54" r="4.5" fill="#ffffff" stroke="#0969da" stroke-opacity="0.7" stroke-width="2"/>
+<path id="t1" d="M880,110 L760,110 L730,140 L660,140" fill="none" stroke="#0969da" stroke-opacity="0.45" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="660" cy="140" r="4.5" fill="#ffffff" stroke="#0969da" stroke-opacity="0.7" stroke-width="2"/>
+<path id="t2" d="M880,136 L800,136 L770,166 L720,166 L700,186 L640,186" fill="none" stroke="#0969da" stroke-opacity="0.45" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="640" cy="186" r="4.5" fill="#ffffff" stroke="#0969da" stroke-opacity="0.7" stroke-width="2"/>
+<path id="t3" d="M880,162 L840,162 L810,192 L780,192" fill="none" stroke="#0969da" stroke-opacity="0.45" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="780" cy="192" r="4.5" fill="#ffffff" stroke="#0969da" stroke-opacity="0.7" stroke-width="2"/>
+<path id="t4" d="M1030,92 L1080,92 L1110,62 L1170,62" fill="none" stroke="#0969da" stroke-opacity="0.45" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="1170" cy="62" r="4.5" fill="#ffffff" stroke="#0969da" stroke-opacity="0.7" stroke-width="2"/>
+<path id="t5" d="M1030,124 L1150,124" fill="none" stroke="#0969da" stroke-opacity="0.45" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="1150" cy="124" r="4.5" fill="#ffffff" stroke="#0969da" stroke-opacity="0.7" stroke-width="2"/>
+<path id="t6" d="M1030,156 L1070,156 L1100,186 L1170,186" fill="none" stroke="#0969da" stroke-opacity="0.45" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="1170" cy="186" r="4.5" fill="#ffffff" stroke="#0969da" stroke-opacity="0.7" stroke-width="2"/>
+<path id="t7" d="M920,188 L920,200 L898,222" fill="none" stroke="#0969da" stroke-opacity="0.45" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="898" cy="222" r="4.5" fill="#ffffff" stroke="#0969da" stroke-opacity="0.7" stroke-width="2"/>
+<path id="t8" d="M990,188 L990,198 L1012,220" fill="none" stroke="#0969da" stroke-opacity="0.45" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="1012" cy="220" r="4.5" fill="#ffffff" stroke="#0969da" stroke-opacity="0.7" stroke-width="2"/>
+<path id="t9" d="M955,62 L955,48 L978,25" fill="none" stroke="#0969da" stroke-opacity="0.45" stroke-width="2" stroke-linejoin="round"/>
+<circle cx="978" cy="25" r="4.5" fill="#ffffff" stroke="#0969da" stroke-opacity="0.7" stroke-width="2"/>
+<rect x="872" y="81" width="8" height="6" fill="#8c959f"/>
+<rect x="1030" y="92" width="8" height="6" fill="#8c959f"/>
+<rect x="872" y="107" width="8" height="6" fill="#8c959f"/>
+<rect x="1030" y="124" width="8" height="6" fill="#8c959f"/>
+<rect x="872" y="133" width="8" height="6" fill="#8c959f"/>
+<rect x="1030" y="156" width="8" height="6" fill="#8c959f"/>
+<rect x="872" y="159" width="8" height="6" fill="#8c959f"/>
+<rect x="880" y="62" width="150" height="126" rx="6" fill="#f6f8fa" stroke="#d0d7de" stroke-width="1.5"/>
+<rect x="894" y="76" width="122" height="98" rx="3" fill="none" stroke="#d0d7de" stroke-dasharray="3 4"/>
+<circle cx="894" cy="76" r="3" fill="#8c959f"/>
+<text x="955.0" y="131.0" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,Consolas,monospace" font-size="17" font-weight="600" fill="#59636e">ESP32</text>
+<circle r="3.5" fill="#1a7f37"><animateMotion dur="4.5s" begin="0s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#t1"/></animateMotion></circle>
+<circle r="3.5" fill="#1a7f37"><animateMotion dur="5.5s" begin="1.8s" repeatCount="indefinite" keyPoints="1;0" keyTimes="0;1" calcMode="linear"><mpath href="#t4"/></animateMotion></circle>
+<text x="56" y="108" font-family="-apple-system,'Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif" font-size="54" font-weight="700" fill="#1f2328">Xi Chuen Lim</text>
+<text x="58" y="150" font-family="-apple-system,'Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif" font-size="22" fill="#59636e">Biomedical Engineering · King's College London</text>
+<rect x="58" y="172" width="4" height="22" rx="2" fill="#1a7f37"/>
+<text x="72" y="190" font-family="-apple-system,'Segoe UI','Helvetica Neue',Helvetica,Arial,sans-serif" font-size="18" fill="#1f2328" fill-opacity="0.85">Robotics, embedded systems and PCB design</text>
+</svg>
