@@ -1,8 +1,14 @@
-## Xi Chuen Lim
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/main/assets/header-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/main/assets/header-light.svg">
+  <img alt="Xi Chuen Lim - Biomedical Engineering, King's College London" src="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/main/assets/header-dark.svg" width="100%">
+</picture>
 
-Biomedical Engineering at King's College London. I build small robots and the electronics inside them, mostly on ESP32s.
-
-[LinkedIn](https://linkedin.com/in/xichuenlim) · [xichuen.lim@kcl.ac.uk](mailto:xichuen.lim@kcl.ac.uk)
+<p>
+  <a href="https://linkedin.com/in/xichuenlim"><img src="https://img.shields.io/badge/LinkedIn-xichuenlim-0A66C2?style=flat-square&logo=linkedin&logoColor=white" alt="LinkedIn"></a>
+  <a href="mailto:xichuen.lim@kcl.ac.uk"><img src="https://img.shields.io/badge/Email-xichuen.lim%40kcl.ac.uk-555555?style=flat-square&logo=maildotru&logoColor=white" alt="Email"></a>
+  <img src="https://img.shields.io/badge/Based_in-Penang_%7C_London-555555?style=flat-square&logo=googlemaps&logoColor=white" alt="Penang | London">
+</p>
 
 ### Projects
 
