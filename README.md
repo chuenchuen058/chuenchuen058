@@ -21,3 +21,9 @@ Python, C/C++, C#, MATLAB, Arduino and ESP32, Fusion 360, some PCB design.
 ### Contact
 
 [LinkedIn](https://linkedin.com/in/xichuenlim) · xichuen.lim@kcl.ac.uk
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/output/pacman-contribution-graph-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/output/pacman-contribution-graph.svg">
+  <img alt="Pac-Man eating my contribution graph" src="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/output/pacman-contribution-graph.svg">
+</picture>
