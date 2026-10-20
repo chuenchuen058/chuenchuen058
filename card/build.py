@@ -1,23 +1,19 @@
-"""Render the profile highlights card.
+"""Render the project cards shown on the profile README.
 
-Pulls live numbers from the GitHub GraphQL API (contributions in the last
-year, commits, public repos, language mix by bytes of code), combines them
-with the hand-written list in achievements.json, and writes a dark and a
-light SVG. A nightly GitHub Action runs this, so the numbers stay current
-without anyone touching the README.
+Each project in projects.json becomes a dark and a light SVG card: title,
+two-line summary, tech chips, a status tag, and a small animated line
+drawing that stands for the project (a voice waveform, a chain of tail
+vertebrae, a robot chassis, a wristband). A GitHub Action runs this on every
+change to card/ and publishes the SVGs to the `card-output` branch.
 
-    python card/build.py --user chuenchuen058 --out dist
-    python card/build.py --offline --out dist     # sample stats, no network
+    python card/build.py --out dist
 
 Standard library only, so the workflow needs no pip install.
 """
 
 import argparse
 import json
-import os
-import sys
-import urllib.request
-from datetime import datetime, timezone
+import math
 from pathlib import Path
 from xml.sax.saxutils import escape
 
@@ -25,218 +21,155 @@ HERE = Path(__file__).resolve().parent
 
 THEMES = {
     "dark": {"bg": "#0d1117", "border": "#30363d", "text": "#e6edf3",
-             "muted": "#8b949e", "line": "#30363d", "track": "#21262d"},
+             "muted": "#8b949e", "chip": "#161b22"},
     "light": {"bg": "#ffffff", "border": "#d0d7de", "text": "#1f2328",
-              "muted": "#59636e", "line": "#d0d7de", "track": "#eaeef2"},
+              "muted": "#59636e", "chip": "#f6f8fa"},
 }
 
-# Tag colours: GitHub's own label palette, readable on both themes.
-TAG_COLOURS = {
-    "Internship": "#1f6feb", "Award": "#bf8700", "Project": "#8250df",
-    "Competition": "#cf222e", "Hackathon": "#1a7f37", "Leadership": "#0969da",
-}
-DEFAULT_TAG = "#6e7781"
-
+W, H = 420, 200
 FONT = "-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif"
-MONO = "ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace"
-
-QUERY = """
-query($login: String!) {
-  user(login: $login) {
-    contributionsCollection {
-      totalCommitContributions
-      contributionCalendar { totalContributions }
-    }
-    repositories(ownerAffiliations: OWNER, privacy: PUBLIC, isFork: false, first: 100) {
-      totalCount
-      nodes {
-        languages(first: 10, orderBy: {field: SIZE, direction: DESC}) {
-          edges { size node { name color } }
-        }
-      }
-    }
-  }
-}
-"""
-
-SAMPLE_STATS = {
-    "contributions": 74, "commits": 37, "repos": 2,
-    "languages": [("Python", "#3572A5", 812000), ("PowerShell", "#012456", 9000),
-                  ("C++", "#f34b7d", 6000)],
-}
-
-
-def fetch_stats(user: str, token: str) -> dict:
-    body = json.dumps({"query": QUERY, "variables": {"login": user}}).encode()
-    req = urllib.request.Request(
-        "https://api.github.com/graphql", data=body,
-        headers={"Authorization": f"bearer {token}", "Content-Type": "application/json",
-                 "User-Agent": "profile-card"})
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        data = json.load(resp)
-    if data.get("errors"):
-        raise RuntimeError(data["errors"][0].get("message", "GraphQL error"))
-    u = data["data"]["user"]
-    cc = u["contributionsCollection"]
-
-    sizes: dict = {}
-    for repo in u["repositories"]["nodes"]:
-        for edge in repo["languages"]["edges"]:
-            name = edge["node"]["name"]
-            colour = edge["node"]["color"] or DEFAULT_TAG
-            prev = sizes.get(name, (colour, 0))
-            sizes[name] = (colour, prev[1] + edge["size"])
-    languages = sorted(((n, c, s) for n, (c, s) in sizes.items()), key=lambda t: -t[2])
-
-    return {
-        "contributions": cc["contributionCalendar"]["totalContributions"],
-        "commits": cc["totalCommitContributions"],
-        "repos": u["repositories"]["totalCount"],
-        "languages": languages,
-    }
-
-
-def top_languages(langs: list, keep: int = 4) -> list:
-    """Top `keep` languages plus an 'Other' bucket, as (name, colour, share)."""
-    total = sum(s for _, _, s in langs) or 1
-    head = [(n, c, s / total) for n, c, s in langs[:keep]]
-    rest = sum(s for _, _, s in langs[keep:]) / total
-    if rest > 0.005:
-        head.append(("Other", DEFAULT_TAG, rest))
-    return head
 
 
 def text_width(s: str, size: float) -> float:
-    """Rough width of sans-serif text; good enough to size pills."""
-    return len(s) * size * 0.56
+    """Rough width of sans-serif text; good enough to size chips."""
+    return len(s) * size * 0.58
 
 
-def render(stats: dict, items: list, title: str, theme: str, updated: str) -> str:
+# --- motifs: small line drawings in the top-right corner -------------------
+# Each returns SVG drawn in a 110x80 box whose top-left is (ox, oy).
+
+def motif_wave(c: str, ox: float, oy: float) -> str:
+    """Voice waveform: bars that pulse out of phase, like Denisse talking."""
+    heights = [18, 34, 54, 40, 62, 30, 46, 22, 38, 14]
+    out = []
+    for i, h in enumerate(heights):
+        x = ox + 6 + i * 10
+        cy = oy + 40
+        dur = 0.9 + (i % 4) * 0.17
+        out.append(
+            f'<rect x="{x}" y="{cy - h / 2}" width="5" height="{h}" rx="2.5" fill="{c}" '
+            f'style="transform-box:fill-box;transform-origin:center;'
+            f'animation:pulse {dur:.2f}s ease-in-out {i * 0.08:.2f}s infinite alternate"/>')
+    return "".join(out)
+
+
+def motif_tail(c: str, ox: float, oy: float) -> str:
+    """Square vertebrae shrinking along a seahorse-style spiral, swaying
+    slowly about the base segment."""
+    cx, cy = ox + 62, oy + 36
+    n = 12
+    pts = []
+    for i in range(n):
+        t = i / (n - 1)
+        th = math.pi * 0.95 + t * math.pi * 1.55      # sweep into a curl
+        r = 36 * (1 - 0.62 * t)
+        pts.append((cx + r * math.cos(th), cy - r * math.sin(th), 13 - 7 * t, th))
+    bx, by = pts[0][0], pts[0][1]
+    out = [f'<g style="transform-origin:{bx:.0f}px {by:.0f}px;'
+           f'animation:sway 3.2s ease-in-out infinite alternate">']
+    for x, y, s, th in pts:
+        rot = -math.degrees(th)
+        out.append(f'<rect x="{x - s / 2:.1f}" y="{y - s / 2:.1f}" width="{s:.1f}" height="{s:.1f}" '
+                   f'rx="2" fill="none" stroke="{c}" stroke-width="2" '
+                   f'transform="rotate({rot:.0f} {x:.1f} {y:.1f})"/>')
+    out.append("</g>")
+    return "".join(out)
+
+
+def motif_robot(c: str, ox: float, oy: float) -> str:
+    """Top-down chassis with four wheels and a sweeping heading arc (IMU)."""
+    cx, cy = ox + 55, oy + 40
+    out = [f'<rect x="{cx - 26}" y="{cy - 30}" width="52" height="60" rx="8" fill="none" stroke="{c}" stroke-width="2.2"/>',
+           f'<rect x="{cx - 10}" y="{cy - 12}" width="20" height="16" rx="2" fill="none" stroke="{c}" stroke-width="1.6"/>']
+    for wx in (cx - 36, cx + 26):
+        for wy in (cy - 26, cy + 8):
+            out.append(f'<rect x="{wx}" y="{wy}" width="10" height="18" rx="3" fill="{c}"/>')
+    out.append(f'<g style="transform-origin:{cx}px {cy}px;animation:spin 4s linear infinite">'
+               f'<path d="M{cx} {cy - 40} A40 40 0 0 1 {cx + 34.6} {cy - 20}" fill="none" stroke="{c}" '
+               f'stroke-width="2" stroke-linecap="round" stroke-dasharray="2 5"/></g>')
+    return "".join(out)
+
+
+def motif_band(c: str, ox: float, oy: float) -> str:
+    """Wristband with a sensor module and motion arcs radiating from it."""
+    cx, cy = ox + 50, oy + 44
+    out = [f'<ellipse cx="{cx}" cy="{cy}" rx="34" ry="22" fill="none" stroke="{c}" stroke-width="6" stroke-opacity=".35"/>',
+           f'<rect x="{cx - 13}" y="{cy - 33}" width="26" height="18" rx="4" fill="{c}"/>']
+    for i, r in enumerate((14, 22, 30)):
+        out.append(f'<path d="M{cx + 18} {cy - 24 - r * 0.6} A{r} {r} 0 0 1 {cx + 18 + r * 0.6} {cy - 24}" '
+                   f'fill="none" stroke="{c}" stroke-width="2" stroke-linecap="round" '
+                   f'style="opacity:0;animation:ping 2.4s ease-out {i * 0.35:.2f}s infinite"/>')
+    return "".join(out)
+
+
+MOTIFS = {"wave": motif_wave, "tail": motif_tail, "robot": motif_robot, "band": motif_band}
+
+
+def render(p: dict, theme: str) -> str:
     t = THEMES[theme]
-    W, pad = 840, 28
-    row_h = 46
-    stats_y = 86
-    bar_y = stats_y + 74
-    list_y = bar_y + 58
-    H = list_y + row_h * len(items) + 18
-
-    out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" '
-           f'viewBox="0 0 {W} {H}" role="img" aria-label="{escape(title)}">']
-    out.append(f"""<style>
-  .fade {{ opacity: 0; animation: up .6s ease-out forwards; }}
-  .grow {{ transform-box: fill-box; transform-origin: left; transform: scaleX(0);
-          animation: grow 1.1s cubic-bezier(.2,.7,.2,1) .3s forwards; }}
-  @keyframes up {{ from {{ opacity: 0; transform: translateY(6px); }} to {{ opacity: 1; transform: none; }} }}
-  @keyframes grow {{ to {{ transform: scaleX(1); }} }}
-  @media (prefers-reduced-motion: reduce) {{
-    .fade, .grow {{ animation: none; opacity: 1; transform: none; }}
-  }}
+    c = p["colour"]
+    out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" '
+           f'role="img" aria-label="{escape(p["name"])}: {escape(" ".join(p["lines"]))}">']
+    out.append("""<style>
+  @keyframes pulse { from { transform: scaleY(.35); } to { transform: scaleY(1); } }
+  @keyframes sway  { from { transform: rotate(-4deg); } to { transform: rotate(5deg); } }
+  @keyframes spin  { to { transform: rotate(360deg); } }
+  @keyframes ping  { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes rise  { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+  .body { animation: rise .6s ease-out both; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
 </style>""")
-    out.append(f'<rect x=".5" y=".5" width="{W-1}" height="{H-1}" rx="10" '
-               f'fill="{t["bg"]}" stroke="{t["border"]}"/>')
+    out.append(f'<rect x=".5" y=".5" width="{W - 1}" height="{H - 1}" rx="10" fill="{t["bg"]}" stroke="{t["border"]}"/>')
+    out.append(f'<rect x=".5" y="18" width="3" height="{H - 36}" rx="1.5" fill="{c}"/>')
 
-    # Title row
-    out.append(f'<text x="{pad}" y="44" font-family="{FONT}" font-size="20" '
-               f'font-weight="600" fill="{t["text"]}">{escape(title)}</text>')
-    out.append(f'<text x="{W-pad}" y="44" text-anchor="end" font-family="{MONO}" '
-               f'font-size="11" fill="{t["muted"]}">updated {escape(updated)}</text>')
-    out.append(f'<line x1="{pad}" y1="62" x2="{W-pad}" y2="62" stroke="{t["line"]}"/>')
+    out.append(f'<g opacity=".9">{MOTIFS[p["motif"]](c, W - 132, 18)}</g>')
 
-    # Stats strip
-    blocks = [(f'{stats["contributions"]:,}', "contributions, last year"),
-              (f'{stats["commits"]:,}', "commits, last year"),
-              (f'{stats["repos"]:,}', "public repositories")]
-    col = (W - 2 * pad) / len(blocks)
-    for i, (num, label) in enumerate(blocks):
-        x = pad + i * col
-        out.append(f'<g class="fade" style="animation-delay:{0.1 * i:.1f}s">'
-                   f'<text x="{x}" y="{stats_y + 24}" font-family="{FONT}" font-size="26" '
-                   f'font-weight="600" fill="{t["text"]}">{num}</text>'
-                   f'<text x="{x}" y="{stats_y + 44}" font-family="{FONT}" font-size="12" '
-                   f'fill="{t["muted"]}">{escape(label)}</text></g>')
+    out.append('<g class="body">')
+    out.append(f'<text x="26" y="50" font-family="{FONT}" font-size="21" font-weight="600" '
+               f'fill="{t["text"]}">{escape(p["name"])}</text>')
+    for i, line in enumerate(p["lines"][:2]):
+        out.append(f'<text x="26" y="{80 + i * 20}" font-family="{FONT}" font-size="13" '
+                   f'fill="{t["muted"]}">{escape(line)}</text>')
 
-    # Language bar
-    langs = top_languages(stats["languages"])
-    bw = W - 2 * pad
-    out.append(f'<rect x="{pad}" y="{bar_y}" width="{bw}" height="8" rx="4" fill="{t["track"]}"/>')
-    out.append(f'<clipPath id="barclip"><rect x="{pad}" y="{bar_y}" width="{bw}" height="8" rx="4"/></clipPath>')
-    out.append(f'<g clip-path="url(#barclip)"><g class="grow">')
-    x = pad
-    for name, colour, share in langs:
-        w = bw * share
-        out.append(f'<rect x="{x:.1f}" y="{bar_y}" width="{w:.1f}" height="8" fill="{colour}"/>')
-        x += w
-    out.append("</g></g>")
-    lx = pad
-    for name, colour, share in langs:
-        label = f"{name} {share * 100:.1f}%"
-        out.append(f'<circle cx="{lx + 4}" cy="{bar_y + 26}" r="4" fill="{colour}"/>'
-                   f'<text x="{lx + 13}" y="{bar_y + 30}" font-family="{FONT}" font-size="12" '
-                   f'fill="{t["muted"]}">{escape(label)}</text>')
-        lx += 13 + text_width(label, 12) + 22
+    # Tech chips, bottom left
+    x = 26
+    for tag in p["tags"]:
+        w = text_width(tag, 11.5) + 18
+        out.append(f'<rect x="{x}" y="148" width="{w:.0f}" height="24" rx="12" fill="{t["chip"]}" stroke="{t["border"]}"/>'
+                   f'<text x="{x + w / 2:.0f}" y="164" text-anchor="middle" font-family="{FONT}" '
+                   f'font-size="11.5" fill="{t["text"]}">{escape(tag)}</text>')
+        x += w + 8
 
-    # Timeline
-    rail_x = pad + 6
-    first = list_y + 14
-    last = list_y + row_h * (len(items) - 1) + 14
-    out.append(f'<line x1="{rail_x}" y1="{first}" x2="{rail_x}" y2="{last}" stroke="{t["line"]}" stroke-width="2"/>')
-    # Every title starts in the same column, past the widest tag pill.
-    pill_col = max(text_width(it.get("tag", ""), 11) + 16 for it in items)
-    for i, item in enumerate(items):
-        y = list_y + i * row_h
-        colour = TAG_COLOURS.get(item.get("tag", ""), DEFAULT_TAG)
-        delay = 0.5 + 0.12 * i
-        tag = item.get("tag", "")
-        tw = text_width(tag, 11) + 16
-        tx = rail_x + 22
-        title_x = tx + pill_col + 12
-        out.append(f'<g class="fade" style="animation-delay:{delay:.2f}s">')
-        out.append(f'<circle cx="{rail_x}" cy="{y + 14}" r="5" fill="{t["bg"]}" stroke="{colour}" stroke-width="2.5"/>')
-        out.append(f'<rect x="{tx}" y="{y + 4}" width="{tw:.0f}" height="20" rx="10" '
-                   f'fill="{colour}" fill-opacity=".15" stroke="{colour}" stroke-opacity=".5"/>')
-        out.append(f'<text x="{tx + tw / 2:.0f}" y="{y + 18}" text-anchor="middle" font-family="{FONT}" '
-                   f'font-size="11" font-weight="600" fill="{colour}">{escape(tag)}</text>')
-        out.append(f'<text x="{title_x:.0f}" y="{y + 19}" font-family="{FONT}" font-size="14" '
-                   f'font-weight="600" fill="{t["text"]}">{escape(item["title"])}</text>')
-        if item.get("detail"):
-            out.append(f'<text x="{title_x:.0f}" y="{y + 37}" font-family="{FONT}" font-size="12" '
-                       f'fill="{t["muted"]}">{escape(item["detail"])}</text>')
-        out.append("</g>")
-
-    out.append("</svg>")
+    # Status, bottom right
+    s = p["status"]
+    sw = text_width(s, 11.5) + 30
+    sx = W - 24 - sw
+    out.append(f'<rect x="{sx:.0f}" y="148" width="{sw:.0f}" height="24" rx="12" fill="{c}" fill-opacity=".14" '
+               f'stroke="{c}" stroke-opacity=".55"/>'
+               f'<circle cx="{sx + 13:.0f}" cy="160" r="3.5" fill="{c}"/>'
+               f'<text x="{sx + 22:.0f}" y="164" font-family="{FONT}" font-size="11.5" font-weight="600" '
+               f'fill="{c}">{escape(s)}</text>')
+    out.append("</g></svg>")
     return "\n".join(out)
 
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--user", default=os.environ.get("GITHUB_REPOSITORY_OWNER", ""))
     ap.add_argument("--out", default="dist")
-    ap.add_argument("--offline", action="store_true", help="use sample stats, no API call")
     args = ap.parse_args()
 
-    data = json.loads((HERE / "achievements.json").read_text(encoding="utf-8"))
-    items = data["items"]
-    for it in items:  # long lines don't wrap in SVG; catch them before they overflow
-        if len(it.get("detail", "")) > 80 or len(it["title"]) > 60:
-            print(f"warning: '{it['title']}' is long and may overflow the card", file=sys.stderr)
-
-    if args.offline:
-        stats = SAMPLE_STATS
-    else:
-        token = os.environ.get("GITHUB_TOKEN")
-        if not token or not args.user:
-            print("need GITHUB_TOKEN and --user (or use --offline)", file=sys.stderr)
-            return 2
-        stats = fetch_stats(args.user, token)
-
-    updated = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    projects = json.loads((HERE / "projects.json").read_text(encoding="utf-8"))["projects"]
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    for theme in THEMES:
-        svg = render(stats, items, data.get("title", "Highlights"), theme, updated)
-        (out / f"highlights-{theme}.svg").write_text(svg, encoding="utf-8")
-    print(f"wrote {out}/highlights-dark.svg and highlights-light.svg "
-          f"({stats['contributions']} contributions, {len(items)} highlights)")
+    for p in projects:
+        if p["motif"] not in MOTIFS:
+            raise SystemExit(f"{p['id']}: unknown motif '{p['motif']}' (choose from {', '.join(MOTIFS)})")
+        for line in p["lines"]:
+            if text_width(line, 13) * 0.9 > W - 160:
+                print(f"warning: {p['id']}: '{line}' may run under the drawing")
+        for theme in THEMES:
+            (out / f"{p['id']}-{theme}.svg").write_text(render(p, theme), encoding="utf-8")
+    print(f"wrote {len(projects) * len(THEMES)} cards to {out}/")
     return 0
 
 
