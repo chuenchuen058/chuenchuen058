@@ -1,0 +1,40 @@
+# Rebuilds the highlights card (card/build.py) with live GitHub stats and
+# publishes the SVGs to the `card-output` branch, which the README points at.
+# Its own branch, so it can never overwrite the Pac-Man graph on `output`.
+name: Build highlights card
+
+on:
+  schedule:
+    - cron: "17 3 * * *"   # nightly
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "card/**"
+      - ".github/workflows/highlights.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Render card
+        run: python card/build.py --user "${{ github.repository_owner }}" --out dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish to card-output
+        uses: crazy-max/ghaction-github-pages@v4
+        with:
+          target_branch: card-output
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
