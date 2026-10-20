@@ -1,9 +1,11 @@
 """Render the project cards shown on the profile README.
 
 Each project in projects.json becomes a dark and a light SVG card: title,
-two-line summary, tech chips, a status tag, and a small animated line
-drawing that stands for the project (a voice waveform, a chain of tail
-vertebrae, a robot chassis, a wristband). A GitHub Action runs this on every
+two-line summary, tech chips, a status tag, and an animated drawing of the
+project working -- Denisse listening and routing tools, a wave running down
+the tail's vertebrae, the robot lapping a track, BlueBand streaming x/y/z
+accelerometer traces. Every card also has a dot grid, a light sweep and a
+highlight running round its border. A GitHub Action runs this on every
 change to card/ and publishes the SVGs to the `card-output` branch.
 
     python card/build.py --out dist
@@ -35,94 +37,159 @@ def text_width(s: str, size: float) -> float:
     return len(s) * size * 0.58
 
 
-# --- motifs: small line drawings in the top-right corner -------------------
-# Each returns SVG drawn in a 110x80 box whose top-left is (ox, oy).
+# --- motifs: animated drawings in the top-right of each card --------------
+# Each draws inside a 125x112 box whose top-left is (ox, oy). `t` is the
+# theme palette, so labels and frames follow light/dark mode.
 
-def motif_wave(c: str, ox: float, oy: float) -> str:
-    """Voice waveform: bars that pulse out of phase, like Denisse talking."""
-    heights = [18, 34, 54, 40, 62, 30, 46, 22, 38, 14]
+MONO = "ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace"
+
+
+def motif_wave(c: str, ox: float, oy: float, t: dict) -> str:
+    """Denisse: listening rings around a voice waveform, and a terminal line
+    cycling through the real pipeline -- listen, route tools, reply."""
+    cx, cy = ox + 62, oy + 40
     out = []
+    for i in range(3):
+        out.append(f'<circle cx="{cx}" cy="{cy}" r="20" fill="none" stroke="{c}" stroke-width="1.5" '
+                   f'style="transform-box:fill-box;transform-origin:center;opacity:0;'
+                   f'animation:ring 2.4s ease-out {i * 0.8:.1f}s infinite"/>')
+    heights = [10, 18, 28, 36, 28, 18, 10]
     for i, h in enumerate(heights):
-        x = ox + 6 + i * 10
-        cy = oy + 40
-        dur = 0.9 + (i % 4) * 0.17
-        out.append(
-            f'<rect x="{x}" y="{cy - h / 2}" width="5" height="{h}" rx="2.5" fill="{c}" '
-            f'style="transform-box:fill-box;transform-origin:center;'
-            f'animation:pulse {dur:.2f}s ease-in-out {i * 0.08:.2f}s infinite alternate"/>')
+        x = cx - 23 + i * 7
+        out.append(f'<rect x="{x}" y="{cy - h / 2}" width="4" height="{h}" rx="2" fill="{c}" '
+                   f'style="transform-box:fill-box;transform-origin:center;'
+                   f'animation:pulse {0.7 + (i % 3) * 0.2:.1f}s ease-in-out {i * 0.07:.2f}s infinite alternate"/>')
+    # terminal line
+    out.append(f'<rect x="{ox + 2}" y="{oy + 80}" width="121" height="24" rx="6" fill="{t["chip"]}" stroke="{t["border"]}"/>')
+    for i, msg in enumerate(("listening…", "route 33→6 tools", "reply in 1.0s")):
+        out.append(f'<g style="opacity:0;animation:show 6s linear {i * 2}s infinite">'
+                   f'<text x="{ox + 11}" y="{oy + 96}" font-family="{MONO}" font-size="10" fill="{c}">›</text>'
+                   f'<text x="{ox + 21}" y="{oy + 96}" font-family="{MONO}" font-size="10" fill="{t["text"]}">{escape(msg)}</text></g>')
+    out.append(f'<rect x="{ox + 113}" y="{oy + 87}" width="5" height="10" fill="{c}" style="animation:blink 1s steps(1) infinite"/>')
     return "".join(out)
 
 
-def motif_tail(c: str, ox: float, oy: float) -> str:
-    """Square vertebrae shrinking along a seahorse-style spiral, swaying
-    slowly about the base segment."""
-    cx, cy = ox + 62, oy + 36
+def motif_tail(c: str, ox: float, oy: float, t: dict) -> str:
+    """Robotic tail: square vertebrae on a seahorse curl with a wave running
+    down them, a tendon carrying tension pulses, and a servo at the base."""
+    cx, cy = ox + 66, oy + 50
     n = 12
     pts = []
     for i in range(n):
-        t = i / (n - 1)
-        th = math.pi * 0.95 + t * math.pi * 1.55      # sweep into a curl
-        r = 36 * (1 - 0.62 * t)
-        pts.append((cx + r * math.cos(th), cy - r * math.sin(th), 13 - 7 * t, th))
-    bx, by = pts[0][0], pts[0][1]
-    out = [f'<g style="transform-origin:{bx:.0f}px {by:.0f}px;'
-           f'animation:sway 3.2s ease-in-out infinite alternate">']
-    for x, y, s, th in pts:
-        rot = -math.degrees(th)
-        out.append(f'<rect x="{x - s / 2:.1f}" y="{y - s / 2:.1f}" width="{s:.1f}" height="{s:.1f}" '
-                   f'rx="2" fill="none" stroke="{c}" stroke-width="2" '
-                   f'transform="rotate({rot:.0f} {x:.1f} {y:.1f})"/>')
-    out.append("</g>")
+        u = i / (n - 1)
+        th = math.pi * 0.95 + u * math.pi * 1.55
+        r = 42 * (1 - 0.62 * u)
+        pts.append((cx + r * math.cos(th), cy - r * math.sin(th), 13 - 7 * u, th))
+    line = " ".join(f"{x:.1f},{y:.1f}" for x, y, _, _ in pts)
+    out = [f'<polyline points="{line}" fill="none" stroke="{c}" stroke-opacity=".3" stroke-width="1.2"/>',
+           f'<polyline points="{line}" fill="none" stroke="{c}" stroke-width="2" stroke-linecap="round" '
+           f'pathLength="100" stroke-dasharray="6 24" style="animation:flow 1.4s linear infinite"/>']
+    for i, (x, y, s, th) in enumerate(pts):
+        out.append(f'<g style="transform-box:fill-box;transform-origin:center;'
+                   f'animation:wiggle 1.6s ease-in-out {i * 0.13:.2f}s infinite alternate">'
+                   f'<rect x="{x - s / 2:.1f}" y="{y - s / 2:.1f}" width="{s:.1f}" height="{s:.1f}" rx="2" '
+                   f'fill="{t["bg"]}" stroke="{c}" stroke-width="2" transform="rotate({-math.degrees(th):.0f} {x:.1f} {y:.1f})"/></g>')
+    bx, by = pts[0][0], pts[0][1] + 20
+    out.append(f'<circle cx="{bx:.1f}" cy="{by:.1f}" r="8" fill="{t["chip"]}" stroke="{c}" stroke-width="1.8"/>'
+               f'<line x1="{bx:.1f}" y1="{by:.1f}" x2="{bx:.1f}" y2="{by - 12:.1f}" stroke="{c}" stroke-width="2.5" '
+               f'stroke-linecap="round" style="transform-origin:{bx:.1f}px {by:.1f}px;animation:horn 1.6s ease-in-out infinite alternate"/>'
+               f'<circle cx="{bx:.1f}" cy="{by:.1f}" r="2" fill="{c}"/>')
     return "".join(out)
 
 
-def motif_robot(c: str, ox: float, oy: float) -> str:
-    """Top-down chassis with four wheels and a sweeping heading arc (IMU)."""
-    cx, cy = ox + 55, oy + 40
-    out = [f'<rect x="{cx - 26}" y="{cy - 30}" width="52" height="60" rx="8" fill="none" stroke="{c}" stroke-width="2.2"/>',
-           f'<rect x="{cx - 10}" y="{cy - 12}" width="20" height="16" rx="2" fill="none" stroke="{c}" stroke-width="1.6"/>']
-    for wx in (cx - 36, cx + 26):
-        for wy in (cy - 26, cy + 8):
-            out.append(f'<rect x="{wx}" y="{wy}" width="10" height="18" rx="3" fill="{c}"/>')
-    out.append(f'<g style="transform-origin:{cx}px {cy}px;animation:spin 4s linear infinite">'
-               f'<path d="M{cx} {cy - 40} A40 40 0 0 1 {cx + 34.6} {cy - 20}" fill="none" stroke="{c}" '
-               f'stroke-width="2" stroke-linecap="round" stroke-dasharray="2 5"/></g>')
+def motif_robot(c: str, ox: float, oy: float, t: dict) -> str:
+    """UnibotsMarkII: the robot drives laps of a track, turning to follow it,
+    with a sensor cone sweeping ahead and waypoints lighting up."""
+    x0, y0, w, h, r = ox + 14, oy + 10, 92, 92, 26
+    track = (f"M{x0 + r} {y0} H{x0 + w - r} A{r} {r} 0 0 1 {x0 + w} {y0 + r} V{y0 + h - r} "
+             f"A{r} {r} 0 0 1 {x0 + w - r} {y0 + h} H{x0 + r} A{r} {r} 0 0 1 {x0} {y0 + h - r} "
+             f"V{y0 + r} A{r} {r} 0 0 1 {x0 + r} {y0} Z")
+    out = [f'<path id="track" d="{track}" fill="none" stroke="{t["border"]}" stroke-width="10" stroke-linejoin="round"/>',
+           f'<path d="{track}" fill="none" stroke="{c}" stroke-opacity=".5" stroke-width="1" stroke-dasharray="3 5"/>']
+    for i, (wx, wy) in enumerate(((x0 + w / 2, y0), (x0 + w, y0 + h / 2), (x0 + w / 2, y0 + h), (x0, y0 + h / 2))):
+        out.append(f'<circle cx="{wx}" cy="{wy}" r="3" fill="{c}" style="opacity:.25;animation:way 6s linear {i * 1.5:.1f}s infinite"/>')
+    out.append(f'<g style="transform-box:fill-box;transform-origin:center;animation:pulse 1.2s ease-in-out infinite alternate">'
+               f'<rect x="{ox + 43}" y="{oy + 46}" width="34" height="20" rx="3" fill="none" stroke="{c}" stroke-opacity=".5"/></g>'
+               f'<text x="{ox + 60}" y="{oy + 59}" text-anchor="middle" font-family="{MONO}" font-size="8" fill="{t["muted"]}">IMU</text>')
+    robot = (f'<path d="M10 0 L28 -11 L28 11 Z" fill="{c}" style="opacity:.18;animation:cone 1s ease-in-out infinite alternate"/>'
+             f'<rect x="-11" y="-8" width="22" height="16" rx="4" fill="{t["bg"]}" stroke="{c}" stroke-width="2"/>'
+             f'<rect x="-9" y="-12" width="7" height="4" rx="1.5" fill="{c}"/><rect x="2" y="-12" width="7" height="4" rx="1.5" fill="{c}"/>'
+             f'<rect x="-9" y="8" width="7" height="4" rx="1.5" fill="{c}"/><rect x="2" y="8" width="7" height="4" rx="1.5" fill="{c}"/>'
+             f'<circle cx="6" cy="0" r="2" fill="{c}"/>')
+    out.append(f'<g>{robot}<animateMotion dur="6s" repeatCount="indefinite" rotate="auto"><mpath href="#track"/></animateMotion></g>')
     return "".join(out)
 
 
-def motif_band(c: str, ox: float, oy: float) -> str:
-    """Wristband with a sensor module and motion arcs radiating from it."""
-    cx, cy = ox + 50, oy + 44
-    out = [f'<ellipse cx="{cx}" cy="{cy}" rx="34" ry="22" fill="none" stroke="{c}" stroke-width="6" stroke-opacity=".35"/>',
-           f'<rect x="{cx - 13}" y="{cy - 33}" width="26" height="18" rx="4" fill="{c}"/>']
-    for i, r in enumerate((14, 22, 30)):
-        out.append(f'<path d="M{cx + 18} {cy - 24 - r * 0.6} A{r} {r} 0 0 1 {cx + 18 + r * 0.6} {cy - 24}" '
-                   f'fill="none" stroke="{c}" stroke-width="2" stroke-linecap="round" '
-                   f'style="opacity:0;animation:ping 2.4s ease-out {i * 0.35:.2f}s infinite"/>')
+def motif_band(c: str, ox: float, oy: float, t: dict) -> str:
+    """BlueBand: live x/y/z accelerometer traces scrolling across a plot,
+    fed by the sensor module on the band, whose LED blinks as it samples."""
+    px, py, pw, ph = ox + 4, oy + 2, 117, 50
+    out = [f'<clipPath id="plot"><rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="5"/></clipPath>',
+           f'<rect x="{px}" y="{py}" width="{pw}" height="{ph}" rx="5" fill="{t["chip"]}" stroke="{t["border"]}"/>',
+           f'<line x1="{px}" y1="{py + ph / 2}" x2="{px + pw}" y2="{py + ph / 2}" stroke="{t["border"]}" stroke-dasharray="2 3"/>']
+    period = pw
+    out.append(f'<g clip-path="url(#plot)"><g style="animation:scroll 2.6s linear infinite">')
+    for k, (amp, cycles, phase, colour, op) in enumerate(((13, 2, 0.0, c, 1), (8, 3, 1.3, c, .55), (5, 5, 2.4, t["muted"], .9))):
+        pts = []
+        for i in range(0, 2 * period + 1, 2):
+            v = math.sin(2 * math.pi * cycles * i / period + phase) + 0.3 * math.sin(2 * math.pi * cycles * 2 * i / period)
+            pts.append(f"{px + i:.0f},{py + ph / 2 - amp * v:.1f}")
+        out.append(f'<polyline points="{" ".join(pts)}" fill="none" stroke="{colour}" stroke-opacity="{op}" stroke-width="1.6"/>')
+    out.append("</g></g>")
+    for k, (lab, colour) in enumerate((("x", c), ("y", c), ("z", t["muted"]))):
+        out.append(f'<text x="{px + 6 + k * 11}" y="{py + 11}" font-family="{MONO}" font-size="8" fill="{colour}">{lab}</text>')
+    bx, by = ox + 62, oy + 92
+    out.append(f'<line x1="{bx}" y1="{by - 22}" x2="{bx}" y2="{py + ph}" stroke="{c}" stroke-width="1.5" '
+               f'stroke-dasharray="3 3" style="animation:flow 0.8s linear infinite"/>')
+    out.append(f'<ellipse cx="{bx}" cy="{by}" rx="44" ry="15" fill="none" stroke="{c}" stroke-width="6" stroke-opacity=".3"/>'
+               f'<rect x="{bx - 15}" y="{by - 26}" width="30" height="18" rx="4" fill="{t["chip"]}" stroke="{c}" stroke-width="1.8"/>'
+               f'<circle cx="{bx + 7}" cy="{by - 17}" r="2.6" fill="{c}" style="animation:blink .5s steps(1) infinite"/>'
+               f'<rect x="{bx - 10}" y="{by - 20}" width="10" height="6" rx="1" fill="none" stroke="{c}" stroke-width="1"/>')
     return "".join(out)
 
 
 MOTIFS = {"wave": motif_wave, "tail": motif_tail, "robot": motif_robot, "band": motif_band}
+
+STYLE = """<style>
+  @keyframes pulse  { from { transform: scaleY(.35); } to { transform: scaleY(1); } }
+  @keyframes ring   { 0% { transform: scale(.6); opacity: .8; } 100% { transform: scale(2.3); opacity: 0; } }
+  @keyframes show   { 0% { opacity: 0; } 4% { opacity: 1; } 30% { opacity: 1; } 34% { opacity: 0; } 100% { opacity: 0; } }
+  @keyframes blink  { 50% { opacity: 0; } }
+  @keyframes wiggle { from { transform: rotate(-9deg) translateY(-1px); } to { transform: rotate(9deg) translateY(1px); } }
+  @keyframes flow   { to { stroke-dashoffset: -30; } }
+  @keyframes horn   { from { transform: rotate(-55deg); } to { transform: rotate(55deg); } }
+  @keyframes way    { 0%, 100% { opacity: .25; } 8% { opacity: 1; } 25% { opacity: .25; } }
+  @keyframes cone   { from { opacity: .08; } to { opacity: .3; } }
+  @keyframes scroll { to { transform: translateX(-117px); } }
+  @keyframes sweep  { from { transform: translateX(-160px); } to { transform: translateX(580px); } }
+  @keyframes run    { to { stroke-dashoffset: -1000; } }
+  @keyframes rise   { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+  .body { animation: rise .6s ease-out both; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+</style>"""
 
 
 def render(p: dict, theme: str) -> str:
     t = THEMES[theme]
     c = p["colour"]
     out = [f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{H}" viewBox="0 0 {W} {H}" '
-           f'role="img" aria-label="{escape(p["name"])}: {escape(" ".join(p["lines"]))}">']
-    out.append("""<style>
-  @keyframes pulse { from { transform: scaleY(.35); } to { transform: scaleY(1); } }
-  @keyframes sway  { from { transform: rotate(-4deg); } to { transform: rotate(5deg); } }
-  @keyframes spin  { to { transform: rotate(360deg); } }
-  @keyframes ping  { 0% { opacity: 0; } 30% { opacity: 1; } 100% { opacity: 0; } }
-  @keyframes rise  { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
-  .body { animation: rise .6s ease-out both; }
-  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
-</style>""")
-    out.append(f'<rect x=".5" y=".5" width="{W - 1}" height="{H - 1}" rx="10" fill="{t["bg"]}" stroke="{t["border"]}"/>')
+           f'role="img" aria-label="{escape(p["name"])}: {escape(" ".join(p["lines"]))}">', STYLE]
+    out.append(f'<defs><clipPath id="card"><rect x=".5" y=".5" width="{W - 1}" height="{H - 1}" rx="10"/></clipPath>'
+               f'<pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse">'
+               f'<circle cx="1.5" cy="1.5" r="1" fill="{t["border"]}"/></pattern>'
+               f'<linearGradient id="scan" x1="0" x2="1"><stop offset="0" stop-color="{c}" stop-opacity="0"/>'
+               f'<stop offset=".5" stop-color="{c}" stop-opacity=".09"/><stop offset="1" stop-color="{c}" stop-opacity="0"/>'
+               f'</linearGradient></defs>')
+    out.append(f'<rect x=".5" y=".5" width="{W - 1}" height="{H - 1}" rx="10" fill="{t["bg"]}"/>')
+    out.append(f'<g clip-path="url(#card)">'
+               f'<rect width="{W}" height="{H}" fill="url(#dots)" opacity=".55"/>'
+               f'<rect width="140" height="{H}" fill="url(#scan)" style="animation:sweep 7s linear infinite"/></g>')
+    out.append(f'<rect x=".5" y=".5" width="{W - 1}" height="{H - 1}" rx="10" fill="none" stroke="{t["border"]}"/>')
+    out.append(f'<rect x=".5" y=".5" width="{W - 1}" height="{H - 1}" rx="10" fill="none" stroke="{c}" stroke-width="1.5" '
+               f'pathLength="1000" stroke-dasharray="80 920" style="animation:run 8s linear infinite"/>')
     out.append(f'<rect x=".5" y="18" width="3" height="{H - 36}" rx="1.5" fill="{c}"/>')
 
-    out.append(f'<g opacity=".9">{MOTIFS[p["motif"]](c, W - 132, 18)}</g>')
+    out.append(MOTIFS[p["motif"]](c, W - 140, 14, t))
 
     out.append('<g class="body">')
     out.append(f'<text x="26" y="50" font-family="{FONT}" font-size="21" font-weight="600" '
@@ -146,7 +213,7 @@ def render(p: dict, theme: str) -> str:
     sx = W - 24 - sw
     out.append(f'<rect x="{sx:.0f}" y="148" width="{sw:.0f}" height="24" rx="12" fill="{c}" fill-opacity=".14" '
                f'stroke="{c}" stroke-opacity=".55"/>'
-               f'<circle cx="{sx + 13:.0f}" cy="160" r="3.5" fill="{c}"/>'
+               f'<circle cx="{sx + 13:.0f}" cy="160" r="3.5" fill="{c}" style="animation:blink 1.6s steps(1) infinite"/>'
                f'<text x="{sx + 22:.0f}" y="164" font-family="{FONT}" font-size="11.5" font-weight="600" '
                f'fill="{c}">{escape(s)}</text>')
     out.append("</g></svg>")
@@ -165,7 +232,7 @@ def main() -> int:
         if p["motif"] not in MOTIFS:
             raise SystemExit(f"{p['id']}: unknown motif '{p['motif']}' (choose from {', '.join(MOTIFS)})")
         for line in p["lines"]:
-            if text_width(line, 13) * 0.9 > W - 160:
+            if len(line) > 38:
                 print(f"warning: {p['id']}: '{line}' may run under the drawing")
         for theme in THEMES:
             (out / f"{p['id']}-{theme}.svg").write_text(render(p, theme), encoding="utf-8")
