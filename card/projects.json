@@ -7,7 +7,7 @@
       "motif": "wave",
       "lines": [
         "Local voice assistant on Llama 3.1 8B.",
-        "Tool routing, nightly eval, offline wake word."
+        "Tool routing, nightly eval, wake word."
       ],
       "tags": [
         "Python",
