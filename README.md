@@ -13,6 +13,12 @@ Biomedical Engineering · King's College London
 
 </div>
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/highlights-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/highlights-light.svg">
+  <img alt="Highlights: live GitHub stats, languages, and a timeline of internships, awards, projects and leadership" src="https://raw.githubusercontent.com/chuenchuen058/chuenchuen058/card-output/highlights-dark.svg" width="100%">
+</picture>
+
 ### Projects
 
 - **[Denisse](https://github.com/chuenchuen058/denisse)** - local voice assistant on Llama 3.1 8B (Ollama). Per-turn tool routing, a nightly 24-case eval, offline wake word.
