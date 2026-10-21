@@ -70,7 +70,7 @@ def motif_wave(c: str, ox: float, oy: float, t: dict) -> str:
                f'<circle cx="{cx - r * 0.62:.1f}" cy="{cy - r * 0.68:.1f}" r="{r * 0.42:.1f}" fill="#fff" fill-opacity=".51" '
                f'filter="url(#orbshine)" clip-path="url(#orbclip)"/></g>')
     rr = r + 8
-    spin = f'style="transform-box:view-box;transform-origin:{cx}px {cy}px;animation:spin 6s linear infinite"'
+    spin = f'class="orb" style="transform-box:view-box;transform-origin:{cx}px {cy}px;animation:spin 6s linear infinite"'
     out.append(f'<g {spin}>'
                f'<circle cx="{cx}" cy="{cy}" r="{rr}" fill="none" stroke="{bright}" stroke-width="3" stroke-linecap="round" '
                f'pathLength="360" stroke-dasharray="150 210"/>'
@@ -185,8 +185,8 @@ STYLE = """<style>
   @keyframes run    { to { stroke-dashoffset: -1000; } }
   @keyframes rise   { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
   .body { animation: rise .6s ease-out both; }
-  /* Reduced motion stops everything except Denisse's orb breathing (.orb): a slow, in-place
-     pulse with no travel. Windows reports reduce whenever "Animation effects" is off, and
+  /* Reduced motion stops everything except Denisse's orb (.orb): its breath and its targeting
+     ring turning once every 6s, both in place with no travel. Windows reports reduce whenever "Animation effects" is off, and
      with a plain * the orb never moved at all on Chuen's own PC (2026-10-21). */
   @media (prefers-reduced-motion: reduce) { *:not(.orb) { animation: none !important; } }
 </style>"""
