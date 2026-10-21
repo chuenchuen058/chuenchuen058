@@ -171,7 +171,9 @@ STYLE = """<style>
   @keyframes pulse  { from { transform: scaleY(.35); } to { transform: scaleY(1); } }
   @keyframes breathe { from { transform: scale(.74); } to { transform: scale(1.06); } }
   @keyframes glow   { from { opacity: .35; } to { opacity: 1; } }
-  @keyframes halo   { 0% { transform: scale(.9); opacity: .8; } 100% { transform: scale(1.9); opacity: 0; } }
+  @keyframes edge   { from { opacity: .12; } to { opacity: .75; } }
+  @keyframes side   { from { transform: scaleY(.74); opacity: .55; } to { transform: scaleY(1.06); opacity: 1; } }
+  @keyframes halo  { 0% { transform: scale(.9); opacity: .8; } 100% { transform: scale(1.9); opacity: 0; } }
   @keyframes spin   { to { transform: rotate(360deg); } }
   @keyframes show   { 0% { opacity: 0; } 4% { opacity: 1; } 30% { opacity: 1; } 34% { opacity: 0; } 100% { opacity: 0; } }
   @keyframes blink  { 50% { opacity: 0; } }
@@ -185,10 +187,10 @@ STYLE = """<style>
   @keyframes run    { to { stroke-dashoffset: -1000; } }
   @keyframes rise   { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
   .body { animation: rise .6s ease-out both; }
-  /* Reduced motion stops everything except Denisse's orb breathing (.orb): a slow, in-place
-     pulse with no travel. Windows reports reduce whenever "Animation effects" is off, and
-     with a plain * the orb never moved at all on Chuen's own PC (2026-10-21). */
-  @media (prefers-reduced-motion: reduce) { *:not(.orb) { animation: none !important; } }
+  /* Reduced motion stops everything except the breathing: Denisse's orb (.orb) and the card
+     sides (.breath), slow in-place pulses with no travel. Windows reports reduce whenever
+     "Animation effects" is off, and with a plain * nothing moved on Chuen's own PC (2026-10-21). */
+  @media (prefers-reduced-motion: reduce) { *:not(.orb):not(.breath) { animation: none !important; } }
 </style>"""
 
 
@@ -210,7 +212,15 @@ def render(p: dict, theme: str) -> str:
     out.append(f'<rect x=".5" y=".5" width="{W - 1}" height="{H - 1}" rx="10" fill="none" stroke="{t["border"]}"/>')
     out.append(f'<rect x=".5" y=".5" width="{W - 1}" height="{H - 1}" rx="10" fill="none" stroke="{c}" stroke-width="1.5" '
                f'pathLength="1000" stroke-dasharray="80 920" style="animation:run 8s linear infinite"/>')
-    out.append(f'<rect x=".5" y="18" width="3" height="{H - 36}" rx="1.5" fill="{c}"/>')
+    # The sides breathe with Denisse's orb: same .6s in, .6s out. A soft glow along the whole
+    # border swells and fades, and the accent bars on both sides grow and brighten with it.
+    out.append(f'<defs><filter id="edgeglow" x="-.1" y="-.2" width="1.2" height="1.4">'
+               f'<feGaussianBlur stdDeviation="3"/></filter></defs>')
+    out.append(f'<rect x="1.5" y="1.5" width="{W - 3}" height="{H - 3}" rx="9.5" fill="none" stroke="{c}" stroke-width="3" '
+               f'filter="url(#edgeglow)" class="breath" style="animation:edge .6s ease-in-out infinite alternate"/>')
+    for bx in (.5, W - 3.5):
+        out.append(f'<rect x="{bx}" y="18" width="3" height="{H - 36}" rx="1.5" fill="{c}" class="breath" '
+                   f'style="transform-box:fill-box;transform-origin:center;animation:side .6s ease-in-out infinite alternate"/>')
 
     out.append(MOTIFS[p["motif"]](c, W - 140, 14, t))
 
