@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="200" viewBox="0 0 420 200" role="img" aria-label="Denisse: Local voice assistant on Llama 3.1 8B. Tool routing, nightly eval, wake word.">
+<style>
+  @keyframes pulse  { from { transform: scaleY(.35); } to { transform: scaleY(1); } }
+  @keyframes breathe { from { transform: scale(.74); } to { transform: scale(1.06); } }
+  @keyframes glow   { from { opacity: .35; } to { opacity: 1; } }
+  @keyframes halo   { 0% { transform: scale(.9); opacity: .8; } 100% { transform: scale(1.9); opacity: 0; } }
+  @keyframes spin   { to { transform: rotate(360deg); } }
+  @keyframes show   { 0% { opacity: 0; } 4% { opacity: 1; } 30% { opacity: 1; } 34% { opacity: 0; } 100% { opacity: 0; } }
+  @keyframes blink  { 50% { opacity: 0; } }
+  @keyframes wiggle { from { transform: rotate(-9deg) translateY(-1px); } to { transform: rotate(9deg) translateY(1px); } }
+  @keyframes flow   { to { stroke-dashoffset: -30; } }
+  @keyframes horn   { from { transform: rotate(-55deg); } to { transform: rotate(55deg); } }
+  @keyframes way    { 0%, 100% { opacity: .25; } 8% { opacity: 1; } 25% { opacity: .25; } }
+  @keyframes cone   { from { opacity: .08; } to { opacity: .3; } }
+  @keyframes scroll { to { transform: translateX(-117px); } }
+  @keyframes sweep  { from { transform: translateX(-160px); } to { transform: translateX(580px); } }
+  @keyframes run    { to { stroke-dashoffset: -1000; } }
+  @keyframes rise   { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+  .body { animation: rise .6s ease-out both; }
+  /* Reduced motion stops everything except Denisse's orb (.orb): its breath and its targeting
+     ring turning once every 6s, both in place with no travel. Windows reports reduce whenever "Animation effects" is off, and
+     with a plain * the orb never moved at all on Chuen's own PC (2026-10-21). */
+  @media (prefers-reduced-motion: reduce) { *:not(.orb) { animation: none !important; } }
+</style>
+<defs><clipPath id="card"><rect x=".5" y=".5" width="419" height="199" rx="10"/></clipPath><pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1" fill="#d0d7de"/></pattern><linearGradient id="scan" x1="0" x2="1"><stop offset="0" stop-color="#8957e5" stop-opacity="0"/><stop offset=".5" stop-color="#8957e5" stop-opacity=".09"/><stop offset="1" stop-color="#8957e5" stop-opacity="0"/></linearGradient></defs>
+<rect x=".5" y=".5" width="419" height="199" rx="10" fill="#ffffff"/>
+<g clip-path="url(#card)"><rect width="420" height="200" fill="url(#dots)" opacity=".55"/><rect width="140" height="200" fill="url(#scan)" style="animation:sweep 7s linear infinite"/></g>
+<rect x=".5" y=".5" width="419" height="199" rx="10" fill="none" stroke="#d0d7de"/>
+<rect x=".5" y=".5" width="419" height="199" rx="10" fill="none" stroke="#8957e5" stroke-width="1.5" pathLength="1000" stroke-dasharray="80 920" style="animation:run 8s linear infinite"/>
+<rect x=".5" y="18" width="3" height="164" rx="1.5" fill="#8957e5"/>
+<defs><radialGradient id="orbcore"><stop offset="0" stop-color="#c9a3ff"/><stop offset="1" stop-color="#4c1d95"/></radialGradient><filter id="orbglow" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="5"/></filter><filter id="orbshine"><feGaussianBlur stdDeviation="2"/></filter><clipPath id="orbclip"><circle cx="342" cy="54" r="22"/></clipPath></defs><circle cx="342" cy="54" r="22" fill="none" stroke="#a855f7" stroke-width="2" style="transform-box:view-box;transform-origin:342px 54px;opacity:0;animation:halo 2.4s ease-out 0.0s infinite"/><circle cx="342" cy="54" r="22" fill="none" stroke="#a855f7" stroke-width="2" style="transform-box:view-box;transform-origin:342px 54px;opacity:0;animation:halo 2.4s ease-out 1.2s infinite"/><g class="orb" style="transform-box:view-box;transform-origin:342px 54px;animation:breathe .6s ease-in-out infinite alternate"><circle cx="342" cy="54" r="26.4" fill="#a855f7" filter="url(#orbglow)" class="orb" style="animation:glow .6s ease-in-out infinite alternate"/></g><g class="orb" style="transform-box:view-box;transform-origin:342px 54px;animation:breathe .6s ease-in-out infinite alternate"><circle cx="342" cy="54" r="22" fill="url(#orbcore)"/><circle cx="328.4" cy="39.0" r="9.2" fill="#fff" fill-opacity=".51" filter="url(#orbshine)" clip-path="url(#orbclip)"/></g><g class="orb" style="transform-box:view-box;transform-origin:342px 54px;animation:spin 6s linear infinite"><circle cx="342" cy="54" r="30" fill="none" stroke="#c9a3ff" stroke-width="3" stroke-linecap="round" pathLength="360" stroke-dasharray="150 210"/><circle cx="342" cy="54" r="30" fill="none" stroke="#7c3aed" stroke-width="3" stroke-linecap="round" pathLength="360" stroke-dasharray="60 300" stroke-dashoffset="-180"/></g><rect x="282" y="94" width="121" height="24" rx="6" fill="#f6f8fa" stroke="#d0d7de"/><g style="opacity:0;animation:show 6s linear 0s infinite"><text x="291" y="110" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="10" fill="#8957e5">›</text><text x="301" y="110" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="10" fill="#1f2328">listening…</text></g><g style="opacity:0;animation:show 6s linear 2s infinite"><text x="291" y="110" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="10" fill="#8957e5">›</text><text x="301" y="110" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="10" fill="#1f2328">route 33→6 tools</text></g><g style="opacity:0;animation:show 6s linear 4s infinite"><text x="291" y="110" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="10" fill="#8957e5">›</text><text x="301" y="110" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="10" fill="#1f2328">reply in 1.0s</text></g><rect x="393" y="101" width="5" height="10" fill="#8957e5" style="animation:blink 1s steps(1) infinite"/>
+<g class="body">
+<text x="26" y="50" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="21" font-weight="600" fill="#1f2328">Denisse</text>
+<text x="26" y="80" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#59636e">Local voice assistant on Llama 3.1 8B.</text>
+<text x="26" y="100" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#59636e">Tool routing, nightly eval, wake word.</text>
+<rect x="26" y="148" width="58" height="24" rx="12" fill="#f6f8fa" stroke="#d0d7de"/><text x="55" y="164" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#1f2328">Python</text>
+<rect x="92.02" y="148" width="58" height="24" rx="12" fill="#f6f8fa" stroke="#d0d7de"/><text x="121" y="164" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#1f2328">Ollama</text>
+<rect x="158.04" y="148" width="45" height="24" rx="12" fill="#f6f8fa" stroke="#d0d7de"/><text x="180" y="164" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#1f2328">Vosk</text>
+<rect x="326" y="148" width="70" height="24" rx="12" fill="#8957e5" fill-opacity=".14" stroke="#8957e5" stroke-opacity=".55"/><circle cx="339" cy="160" r="3.5" fill="#8957e5" style="animation:blink 1.6s steps(1) infinite"/><text x="348" y="164" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" font-weight="600" fill="#8957e5">Active</text>
+</g></svg>

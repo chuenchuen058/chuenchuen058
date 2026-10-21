@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="420" height="200" viewBox="0 0 420 200" role="img" aria-label="UnibotsMarkII: 4-wheel ESP32 competition robot: TB6612FNG drivers, MPU6050 IMU.">
+<style>
+  @keyframes pulse  { from { transform: scaleY(.35); } to { transform: scaleY(1); } }
+  @keyframes breathe { from { transform: scale(.74); } to { transform: scale(1.06); } }
+  @keyframes glow   { from { opacity: .35; } to { opacity: 1; } }
+  @keyframes halo   { 0% { transform: scale(.9); opacity: .8; } 100% { transform: scale(1.9); opacity: 0; } }
+  @keyframes spin   { to { transform: rotate(360deg); } }
+  @keyframes show   { 0% { opacity: 0; } 4% { opacity: 1; } 30% { opacity: 1; } 34% { opacity: 0; } 100% { opacity: 0; } }
+  @keyframes blink  { 50% { opacity: 0; } }
+  @keyframes wiggle { from { transform: rotate(-9deg) translateY(-1px); } to { transform: rotate(9deg) translateY(1px); } }
+  @keyframes flow   { to { stroke-dashoffset: -30; } }
+  @keyframes horn   { from { transform: rotate(-55deg); } to { transform: rotate(55deg); } }
+  @keyframes way    { 0%, 100% { opacity: .25; } 8% { opacity: 1; } 25% { opacity: .25; } }
+  @keyframes cone   { from { opacity: .08; } to { opacity: .3; } }
+  @keyframes scroll { to { transform: translateX(-117px); } }
+  @keyframes sweep  { from { transform: translateX(-160px); } to { transform: translateX(580px); } }
+  @keyframes run    { to { stroke-dashoffset: -1000; } }
+  @keyframes rise   { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+  .body { animation: rise .6s ease-out both; }
+  /* Reduced motion stops everything except Denisse's orb (.orb): its breath and its targeting
+     ring turning once every 6s, both in place with no travel. Windows reports reduce whenever "Animation effects" is off, and
+     with a plain * the orb never moved at all on Chuen's own PC (2026-10-21). */
+  @media (prefers-reduced-motion: reduce) { *:not(.orb) { animation: none !important; } }
+</style>
+<defs><clipPath id="card"><rect x=".5" y=".5" width="419" height="199" rx="10"/></clipPath><pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r="1" fill="#d0d7de"/></pattern><linearGradient id="scan" x1="0" x2="1"><stop offset="0" stop-color="#f85149" stop-opacity="0"/><stop offset=".5" stop-color="#f85149" stop-opacity=".09"/><stop offset="1" stop-color="#f85149" stop-opacity="0"/></linearGradient></defs>
+<rect x=".5" y=".5" width="419" height="199" rx="10" fill="#ffffff"/>
+<g clip-path="url(#card)"><rect width="420" height="200" fill="url(#dots)" opacity=".55"/><rect width="140" height="200" fill="url(#scan)" style="animation:sweep 7s linear infinite"/></g>
+<rect x=".5" y=".5" width="419" height="199" rx="10" fill="none" stroke="#d0d7de"/>
+<rect x=".5" y=".5" width="419" height="199" rx="10" fill="none" stroke="#f85149" stroke-width="1.5" pathLength="1000" stroke-dasharray="80 920" style="animation:run 8s linear infinite"/>
+<rect x=".5" y="18" width="3" height="164" rx="1.5" fill="#f85149"/>
+<path id="track" d="M320 24 H360 A26 26 0 0 1 386 50 V90 A26 26 0 0 1 360 116 H320 A26 26 0 0 1 294 90 V50 A26 26 0 0 1 320 24 Z" fill="none" stroke="#d0d7de" stroke-width="10" stroke-linejoin="round"/><path d="M320 24 H360 A26 26 0 0 1 386 50 V90 A26 26 0 0 1 360 116 H320 A26 26 0 0 1 294 90 V50 A26 26 0 0 1 320 24 Z" fill="none" stroke="#f85149" stroke-opacity=".5" stroke-width="1" stroke-dasharray="3 5"/><circle cx="340.0" cy="24" r="3" fill="#f85149" style="opacity:.25;animation:way 6s linear 0.0s infinite"/><circle cx="386" cy="70.0" r="3" fill="#f85149" style="opacity:.25;animation:way 6s linear 1.5s infinite"/><circle cx="340.0" cy="116" r="3" fill="#f85149" style="opacity:.25;animation:way 6s linear 3.0s infinite"/><circle cx="294" cy="70.0" r="3" fill="#f85149" style="opacity:.25;animation:way 6s linear 4.5s infinite"/><g style="transform-box:fill-box;transform-origin:center;animation:pulse 1.2s ease-in-out infinite alternate"><rect x="323" y="60" width="34" height="20" rx="3" fill="none" stroke="#f85149" stroke-opacity=".5"/></g><text x="340" y="73" text-anchor="middle" font-family="ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace" font-size="8" fill="#59636e">IMU</text><g><path d="M10 0 L28 -11 L28 11 Z" fill="#f85149" style="opacity:.18;animation:cone 1s ease-in-out infinite alternate"/><rect x="-11" y="-8" width="22" height="16" rx="4" fill="#ffffff" stroke="#f85149" stroke-width="2"/><rect x="-9" y="-12" width="7" height="4" rx="1.5" fill="#f85149"/><rect x="2" y="-12" width="7" height="4" rx="1.5" fill="#f85149"/><rect x="-9" y="8" width="7" height="4" rx="1.5" fill="#f85149"/><rect x="2" y="8" width="7" height="4" rx="1.5" fill="#f85149"/><circle cx="6" cy="0" r="2" fill="#f85149"/><animateMotion dur="6s" repeatCount="indefinite" rotate="auto"><mpath href="#track"/></animateMotion></g>
+<g class="body">
+<text x="26" y="50" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="21" font-weight="600" fill="#1f2328">UnibotsMarkII</text>
+<text x="26" y="80" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#59636e">4-wheel ESP32 competition robot:</text>
+<text x="26" y="100" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="13" fill="#59636e">TB6612FNG drivers, MPU6050 IMU.</text>
+<rect x="26" y="148" width="51" height="24" rx="12" fill="#f6f8fa" stroke="#d0d7de"/><text x="52" y="164" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#1f2328">ESP32</text>
+<rect x="85.35" y="148" width="38" height="24" rx="12" fill="#f6f8fa" stroke="#d0d7de"/><text x="104" y="164" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#1f2328">C++</text>
+<rect x="131.35999999999999" y="148" width="71" height="24" rx="12" fill="#f6f8fa" stroke="#d0d7de"/><text x="167" y="164" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" fill="#1f2328">Embedded</text>
+<rect x="313" y="148" width="83" height="24" rx="12" fill="#f85149" fill-opacity=".14" stroke="#f85149" stroke-opacity=".55"/><circle cx="326" cy="160" r="3.5" fill="#f85149" style="animation:blink 1.6s steps(1) infinite"/><text x="335" y="164" font-family="-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif" font-size="11.5" font-weight="600" fill="#f85149">Bring-up</text>
+</g></svg>
