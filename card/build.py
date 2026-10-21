@@ -56,14 +56,15 @@ def motif_wave(c: str, ox: float, oy: float, t: dict) -> str:
            f'<filter id="orbglow" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="5"/></filter>'
            f'<filter id="orbshine"><feGaussianBlur stdDeviation="2"/></filter>'
            f'<clipPath id="orbclip"><circle cx="{cx}" cy="{cy}" r="{r}"/></clipPath></defs>']
-    breathe = 'style="transform-box:view-box;transform-origin:{0}px {1}px;animation:breathe .6s ease-in-out infinite alternate"'.format(cx, cy)
+    # class="orb": the breath keeps running under prefers-reduced-motion (see STYLE)
+    breathe = 'class="orb" style="transform-box:view-box;transform-origin:{0}px {1}px;animation:breathe .6s ease-in-out infinite alternate"'.format(cx, cy)
     # pulse waves: a halo leaves the orb on every in-breath and fades out
     for i in range(2):
         out.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{accent}" stroke-width="2" '
                    f'style="transform-box:view-box;transform-origin:{cx}px {cy}px;opacity:0;'
                    f'animation:halo 2.4s ease-out {i * 1.2:.1f}s infinite"/>')
     # glow: brighter and bigger on the in-breath, like the orb's 150->229 alpha swing
-    out.append(f'<g {breathe}><circle cx="{cx}" cy="{cy}" r="{r * 1.2:.1f}" fill="{accent}" filter="url(#orbglow)" '
+    out.append(f'<g {breathe}><circle cx="{cx}" cy="{cy}" r="{r * 1.2:.1f}" fill="{accent}" filter="url(#orbglow)" class="orb" '
                f'style="animation:glow .6s ease-in-out infinite alternate"/></g>')
     out.append(f'<g {breathe}><circle cx="{cx}" cy="{cy}" r="{r}" fill="url(#orbcore)"/>'
                f'<circle cx="{cx - r * 0.62:.1f}" cy="{cy - r * 0.68:.1f}" r="{r * 0.42:.1f}" fill="#fff" fill-opacity=".51" '
@@ -184,7 +185,10 @@ STYLE = """<style>
   @keyframes run    { to { stroke-dashoffset: -1000; } }
   @keyframes rise   { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
   .body { animation: rise .6s ease-out both; }
-  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  /* Reduced motion stops everything except Denisse's orb breathing (.orb): a slow, in-place
+     pulse with no travel. Windows reports reduce whenever "Animation effects" is off, and
+     with a plain * the orb never moved at all on Chuen's own PC (2026-10-21). */
+  @media (prefers-reduced-motion: reduce) { *:not(.orb) { animation: none !important; } }
 </style>"""
 
 
