@@ -2,9 +2,9 @@
 
 Each project in projects.json becomes a dark and a light SVG card: title,
 two-line summary, tech chips, a status tag, and an animated drawing of the
-project working -- Denisse listening and routing tools, a wave running down
-the tail's vertebrae, the robot lapping a track, BlueBand streaming x/y/z
-accelerometer traces. Every card also has a dot grid, a light sweep and a
+project working -- Denisse's breathing orb and targeting ring, a wave
+running down the tail's vertebrae, the robot lapping a track, BlueBand
+streaming x/y/z accelerometer traces. Every card also has a dot grid, a light sweep and a
 highlight running round its border. A GitHub Action runs this on every
 change to card/ and publishes the SVGs to the `card-output` branch.
 
@@ -45,25 +45,36 @@ MONO = "ui-monospace,SFMono-Regular,'SF Mono',Menlo,Consolas,monospace"
 
 
 def motif_wave(c: str, ox: float, oy: float, t: dict) -> str:
-    """Denisse: listening rings around a voice waveform, and a terminal line
-    cycling through the real pipeline -- listen, route tools, reply."""
-    cx, cy = ox + 62, oy + 40
-    out = []
-    for i in range(3):
-        out.append(f'<circle cx="{cx}" cy="{cy}" r="20" fill="none" stroke="{c}" stroke-width="1.5" '
-                   f'style="transform-box:fill-box;transform-origin:center;opacity:0;'
-                   f'animation:ring 2.4s ease-out {i * 0.8:.1f}s infinite"/>')
-    heights = [10, 18, 28, 36, 28, 18, 10]
-    for i, h in enumerate(heights):
-        x = cx - 23 + i * 7
-        out.append(f'<rect x="{x}" y="{cy - h / 2}" width="4" height="{h}" rx="2" fill="{c}" '
-                   f'style="transform-box:fill-box;transform-origin:center;'
-                   f'animation:pulse {0.7 + (i % 3) * 0.2:.1f}s ease-in-out {i * 0.07:.2f}s infinite alternate"/>')
+    """Denisse: her floating desktop orb (floating_orb.py) -- a glossy purple
+    sphere breathing once every 1.2s inside a soft glow, with the JARVIS-style
+    targeting ring turning once every 6s -- above a terminal line cycling
+    through the real pipeline: listen, route tools, reply."""
+    cx, cy, r = ox + 62, oy + 40, 22
+    bright, accent, deep, ring2 = "#c9a3ff", "#a855f7", "#4c1d95", "#7c3aed"
+    out = [f'<defs><radialGradient id="orbcore"><stop offset="0" stop-color="{bright}"/>'
+           f'<stop offset="1" stop-color="{deep}"/></radialGradient>'
+           f'<filter id="orbglow" x="-1" y="-1" width="3" height="3"><feGaussianBlur stdDeviation="5"/></filter>'
+           f'<filter id="orbshine"><feGaussianBlur stdDeviation="2"/></filter>'
+           f'<clipPath id="orbclip"><circle cx="{cx}" cy="{cy}" r="{r}"/></clipPath></defs>']
+    breathe = 'style="transform-box:view-box;transform-origin:{0}px {1}px;animation:breathe .6s ease-in-out infinite alternate"'.format(cx, cy)
+    # glow: brighter and bigger on the in-breath, like the orb's 150->229 alpha swing
+    out.append(f'<g {breathe}><circle cx="{cx}" cy="{cy}" r="{r * 1.2:.1f}" fill="{accent}" filter="url(#orbglow)" '
+               f'style="animation:glow .6s ease-in-out infinite alternate"/></g>')
+    out.append(f'<g {breathe}><circle cx="{cx}" cy="{cy}" r="{r}" fill="url(#orbcore)"/>'
+               f'<circle cx="{cx - r * 0.62:.1f}" cy="{cy - r * 0.68:.1f}" r="{r * 0.42:.1f}" fill="#fff" fill-opacity=".51" '
+               f'filter="url(#orbshine)" clip-path="url(#orbclip)"/></g>')
+    rr = r + 8
+    spin = f'style="transform-box:view-box;transform-origin:{cx}px {cy}px;animation:spin 6s linear infinite"'
+    out.append(f'<g {spin}>'
+               f'<circle cx="{cx}" cy="{cy}" r="{rr}" fill="none" stroke="{bright}" stroke-width="3" stroke-linecap="round" '
+               f'pathLength="360" stroke-dasharray="150 210"/>'
+               f'<circle cx="{cx}" cy="{cy}" r="{rr}" fill="none" stroke="{ring2}" stroke-width="3" stroke-linecap="round" '
+               f'pathLength="360" stroke-dasharray="60 300" stroke-dashoffset="-180"/></g>')
     # terminal line
     out.append(f'<rect x="{ox + 2}" y="{oy + 80}" width="121" height="24" rx="6" fill="{t["chip"]}" stroke="{t["border"]}"/>')
-    for i, msg in enumerate(("listening…", "route 33→6 tools", "reply in 1.0s")):
+    for i, msg in enumerate(("listening\u2026", "route 33\u21926 tools", "reply in 1.0s")):
         out.append(f'<g style="opacity:0;animation:show 6s linear {i * 2}s infinite">'
-                   f'<text x="{ox + 11}" y="{oy + 96}" font-family="{MONO}" font-size="10" fill="{c}">›</text>'
+                   f'<text x="{ox + 11}" y="{oy + 96}" font-family="{MONO}" font-size="10" fill="{c}">\u203a</text>'
                    f'<text x="{ox + 21}" y="{oy + 96}" font-family="{MONO}" font-size="10" fill="{t["text"]}">{escape(msg)}</text></g>')
     out.append(f'<rect x="{ox + 113}" y="{oy + 87}" width="5" height="10" fill="{c}" style="animation:blink 1s steps(1) infinite"/>')
     return "".join(out)
@@ -152,7 +163,9 @@ MOTIFS = {"wave": motif_wave, "tail": motif_tail, "robot": motif_robot, "band": 
 
 STYLE = """<style>
   @keyframes pulse  { from { transform: scaleY(.35); } to { transform: scaleY(1); } }
-  @keyframes ring   { 0% { transform: scale(.6); opacity: .8; } 100% { transform: scale(2.3); opacity: 0; } }
+  @keyframes breathe { from { transform: scale(.8152); } to { transform: scale(1); } }
+  @keyframes glow   { from { opacity: .59; } to { opacity: .9; } }
+  @keyframes spin   { to { transform: rotate(360deg); } }
   @keyframes show   { 0% { opacity: 0; } 4% { opacity: 1; } 30% { opacity: 1; } 34% { opacity: 0; } 100% { opacity: 0; } }
   @keyframes blink  { 50% { opacity: 0; } }
   @keyframes wiggle { from { transform: rotate(-9deg) translateY(-1px); } to { transform: rotate(9deg) translateY(1px); } }
