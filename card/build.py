@@ -57,6 +57,11 @@ def motif_wave(c: str, ox: float, oy: float, t: dict) -> str:
            f'<filter id="orbshine"><feGaussianBlur stdDeviation="2"/></filter>'
            f'<clipPath id="orbclip"><circle cx="{cx}" cy="{cy}" r="{r}"/></clipPath></defs>']
     breathe = 'style="transform-box:view-box;transform-origin:{0}px {1}px;animation:breathe .6s ease-in-out infinite alternate"'.format(cx, cy)
+    # pulse waves: a halo leaves the orb on every in-breath and fades out
+    for i in range(2):
+        out.append(f'<circle cx="{cx}" cy="{cy}" r="{r}" fill="none" stroke="{accent}" stroke-width="2" '
+                   f'style="transform-box:view-box;transform-origin:{cx}px {cy}px;opacity:0;'
+                   f'animation:halo 2.4s ease-out {i * 1.2:.1f}s infinite"/>')
     # glow: brighter and bigger on the in-breath, like the orb's 150->229 alpha swing
     out.append(f'<g {breathe}><circle cx="{cx}" cy="{cy}" r="{r * 1.2:.1f}" fill="{accent}" filter="url(#orbglow)" '
                f'style="animation:glow .6s ease-in-out infinite alternate"/></g>')
@@ -163,8 +168,9 @@ MOTIFS = {"wave": motif_wave, "tail": motif_tail, "robot": motif_robot, "band": 
 
 STYLE = """<style>
   @keyframes pulse  { from { transform: scaleY(.35); } to { transform: scaleY(1); } }
-  @keyframes breathe { from { transform: scale(.8152); } to { transform: scale(1); } }
-  @keyframes glow   { from { opacity: .59; } to { opacity: .9; } }
+  @keyframes breathe { from { transform: scale(.74); } to { transform: scale(1.06); } }
+  @keyframes glow   { from { opacity: .35; } to { opacity: 1; } }
+  @keyframes halo   { 0% { transform: scale(.9); opacity: .8; } 100% { transform: scale(1.9); opacity: 0; } }
   @keyframes spin   { to { transform: rotate(360deg); } }
   @keyframes show   { 0% { opacity: 0; } 4% { opacity: 1; } 30% { opacity: 1; } 34% { opacity: 0; } 100% { opacity: 0; } }
   @keyframes blink  { 50% { opacity: 0; } }
